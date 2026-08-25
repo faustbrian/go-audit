@@ -11,6 +11,8 @@ Keep a Changelog, and releases follow Semantic Versioning.
   the PostgreSQL adapter's independent fuzz gate.
 - Verify clean consumers against versioned standalone modules without local
   replacements or sibling checkouts.
+- Align the PostgreSQL adapter with the current standalone root archive
+  checksum used by repository-local and CI verification.
 
 - Exclude intentional nested modules from root local-proxy archives so local,
   bootstrap, CI, and public module checksums describe the same source
