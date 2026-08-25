@@ -13,6 +13,7 @@ Keep a Changelog, and releases follow Semantic Versioning.
   replacements or sibling checkouts.
 - Align the PostgreSQL adapter with the current standalone root archive
   checksum used by repository-local and CI verification.
+- Make CodeQL resolve nested modules through that same current root archive.
 
 - Exclude intentional nested modules from root local-proxy archives so local,
   bootstrap, CI, and public module checksums describe the same source
