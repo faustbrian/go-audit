@@ -7,6 +7,9 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 ### Changed
 
+- Upgrade PostgreSQL adapter archive and cryptography dependencies to current
+  security-fixed releases.
+
 - Keep root fuzzing scoped to the root module; the standalone CI matrix owns
   the PostgreSQL adapter's independent fuzz gate.
 - Verify clean consumers against versioned standalone modules without local
