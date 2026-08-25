@@ -32,8 +32,8 @@ coverage:
 	./scripts/check-coverage.sh
 
 mutation:
-	./scripts/with-gocache.sh ../../scripts/check-mutation.sh .
-	./scripts/with-gocache.sh ../../scripts/check-mutation.sh postgres
+	./scripts/with-gocache.sh ./.golib/scripts/check-mutation.sh .
+	./scripts/with-gocache.sh ./.golib/scripts/check-mutation.sh postgres
 
 fuzz:
 	./scripts/with-gocache.sh $(GO) test . -run '^$$' -fuzz '^FuzzCanonicalRecord$$' -fuzztime='$(FUZZ_TIME)'

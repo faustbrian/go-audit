@@ -40,7 +40,7 @@ while read -r version image extra; do
         exit 1
     }
     expected_version=$((expected_version + 1))
-    base_digest="$("${root}/scripts/gate-input-digest.sh" test "${module}")"
+    base_digest="$("${root}/.golib/scripts/gate-input-digest.sh" test "${module}")"
     input_digest="$(printf '%s\n%s\n%s\n' "${base_digest}" "${version}" "${image}" | shasum -a 256 | awk '{print $1}')"
     directory="${artifact}/by-input/${input_digest}"
     evidence="${directory}/postgres-${version}.json"
@@ -79,12 +79,12 @@ while read -r version image extra; do
     started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     set +e
     POSTGRES_VERSION="${version}" "${root}/scripts/with-gocache.sh" \
-        "${root}/scripts/check-module.sh" "${module}" test 2>&1 | tee "${temporary_log}"
+        "${root}/.golib/scripts/check-module.sh" "${module}" test 2>&1 | tee "${temporary_log}"
     status=${PIPESTATUS[0]}
     set -e
     completed_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     completed_revision="$(git -C "${root}" rev-parse HEAD)"
-    completed_base_digest="$("${root}/scripts/gate-input-digest.sh" test "${module}")"
+    completed_base_digest="$("${root}/.golib/scripts/gate-input-digest.sh" test "${module}")"
     completed_digest="$(printf '%s\n%s\n%s\n' "${completed_base_digest}" "${version}" "${image}" | shasum -a 256 | awk '{print $1}')"
     result=passed
     if [[ "${status}" -ne 0 ]]; then
