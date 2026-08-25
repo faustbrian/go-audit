@@ -7,6 +7,11 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 ### Changed
 
+- Keep root fuzzing scoped to the root module; the standalone CI matrix owns
+  the PostgreSQL adapter's independent fuzz gate.
+- Verify clean consumers against versioned standalone modules without local
+  replacements or sibling checkouts.
+
 - Exclude intentional nested modules from root local-proxy archives so local,
   bootstrap, CI, and public module checksums describe the same source
   boundary.

@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 temporary="$(mktemp -d "${TMPDIR:-/tmp}/golib-audit-consumer.XXXXXX")"
 cleanup() {
     case "${temporary}" in
@@ -17,8 +16,7 @@ mkdir "${temporary}/core"
 cd "${temporary}/core"
 GOWORK=off go mod init example.com/audit-consumer
 GOWORK=off go mod edit \
-    -require=github.com/faustbrian/go-audit@v0.0.0 \
-    -replace="github.com/faustbrian/go-audit=${root}"
+    -require=github.com/faustbrian/go-audit@v1.0.0
 mkdir consumer
 printf '%s\n' \
     'package consumer' \
@@ -41,12 +39,9 @@ mkdir "${temporary}/postgres"
 cd "${temporary}/postgres"
 GOWORK=off go mod init example.com/audit-postgres-consumer
 GOWORK=off go mod edit \
-    -require=github.com/faustbrian/go-audit@v0.0.0 \
-    -require=github.com/faustbrian/go-audit/postgres@v0.0.0 \
-    -require=github.com/faustbrian/go-postgres@v0.0.0 \
-    -replace="github.com/faustbrian/go-audit=${root}" \
-    -replace="github.com/faustbrian/go-audit/postgres=${root}/postgres" \
-    -replace="github.com/faustbrian/go-postgres=${root}/../postgres"
+    -require=github.com/faustbrian/go-audit@v1.0.0 \
+    -require=github.com/faustbrian/go-audit/postgres@v1.0.0 \
+    -require=github.com/faustbrian/go-postgres@v1.0.1
 mkdir consumer
 printf '%s\n' \
     'package consumer' \

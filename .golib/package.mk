@@ -12,21 +12,19 @@ format-check:
 	test -z "$$(gofmt -l $$(find . -type f -name '*.go'))"
 
 module-check:
-	cd ../.. && scripts/with-gocache.sh ./scripts/check-module.sh . tidy-check
-	cd ../.. && scripts/with-gocache.sh ./scripts/check-module.sh postgres tidy-check
+	./scripts/with-gocache.sh ./.golib/scripts/run-modules.sh tidy-check --all
 
 test:
-	cd ../.. && scripts/with-gocache.sh ./scripts/check-module.sh . test
+	./scripts/with-gocache.sh ./.golib/scripts/run-modules.sh test --all
 
 integration:
-	cd ../.. && POSTGRES_VERSION='$(POSTGRES_VERSION)' scripts/with-gocache.sh ./scripts/check-module.sh postgres test
+	./scripts/run-postgres-matrix.sh
 
 integration-matrix:
 	./scripts/run-postgres-matrix.sh
 
 test-race:
-	cd ../.. && scripts/with-gocache.sh ./scripts/check-module.sh . race
-	cd ../.. && scripts/with-gocache.sh ./scripts/check-module.sh postgres race
+	./scripts/with-gocache.sh ./.golib/scripts/run-modules.sh race --all
 
 coverage:
 	./scripts/check-coverage.sh
@@ -39,7 +37,6 @@ fuzz:
 	./scripts/with-gocache.sh $(GO) test . -run '^$$' -fuzz '^FuzzCanonicalRecord$$' -fuzztime='$(FUZZ_TIME)'
 	./scripts/with-gocache.sh $(GO) test . -run '^$$' -fuzz '^FuzzHostileRecordConstruction$$' -fuzztime='$(FUZZ_TIME)'
 	./scripts/with-gocache.sh $(GO) test . -run '^$$' -fuzz '^FuzzCursor$$' -fuzztime='$(FUZZ_TIME)'
-	cd ../.. && GOLIB_FUZZ_SMOKE_BUDGET='$(FUZZ_TIME)' scripts/with-gocache.sh ./scripts/check-module.sh postgres fuzz
 
 stress:
 	./scripts/with-gocache.sh $(GO) test ./memory -run 'Stress' -count=100
@@ -56,8 +53,7 @@ clean-consumer:
 	./scripts/with-gocache.sh ./scripts/check-clean-consumer.sh
 
 vet:
-	cd ../.. && scripts/with-gocache.sh ./scripts/check-module.sh . vet
-	cd ../.. && scripts/with-gocache.sh ./scripts/check-module.sh postgres vet
+	./scripts/with-gocache.sh ./.golib/scripts/run-modules.sh vet --all
 
 docs:
 	./scripts/check-docs.sh
