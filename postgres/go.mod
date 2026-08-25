@@ -1,10 +1,10 @@
-module github.com/faustbrian/golib/pkg/audit/postgres
+module github.com/faustbrian/go-audit/postgres
 
 go 1.26.6
 
 require (
-	github.com/faustbrian/golib/pkg/audit v0.0.0
-	github.com/faustbrian/golib/pkg/postgres v0.0.0
+	github.com/faustbrian/go-audit v1.0.0
+	github.com/faustbrian/go-postgresql v1.0.0
 	github.com/jackc/pgx/v5 v5.10.0
 	go.uber.org/goleak v1.3.0
 )

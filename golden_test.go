@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/audit"
+	"github.com/faustbrian/go-audit"
 )
 
 func TestCanonicalGoldenRecordAndIndependentChainDigest(t *testing.T) {

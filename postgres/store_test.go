@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/faustbrian/golib/pkg/audit"
-	auditpostgres "github.com/faustbrian/golib/pkg/audit/postgres"
+	"github.com/faustbrian/go-audit"
+	auditpostgres "github.com/faustbrian/go-audit/postgres"
 )
 
 func TestAdapterExposesAppendOnlyLeastPrivilegeSchema(t *testing.T) {

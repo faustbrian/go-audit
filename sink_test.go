@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/faustbrian/golib/pkg/audit"
+	"github.com/faustbrian/go-audit"
 )
 
 func TestAppendErrorsDistinguishUnknownOutcomeFromConfirmedRejection(t *testing.T) {

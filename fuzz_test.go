@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/audit"
+	"github.com/faustbrian/go-audit"
 )
 
 func FuzzCanonicalRecord(f *testing.F) {

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/audit"
-	"github.com/faustbrian/golib/pkg/audit/memory"
+	"github.com/faustbrian/go-audit"
+	"github.com/faustbrian/go-audit/memory"
 )
 
 func ExampleBuilder() {

@@ -17,15 +17,15 @@ mkdir "${temporary}/core"
 cd "${temporary}/core"
 GOWORK=off go mod init example.com/audit-consumer
 GOWORK=off go mod edit \
-    -require=github.com/faustbrian/golib/pkg/audit@v0.0.0 \
-    -replace="github.com/faustbrian/golib/pkg/audit=${root}"
+    -require=github.com/faustbrian/go-audit@v0.0.0 \
+    -replace="github.com/faustbrian/go-audit=${root}"
 mkdir consumer
 printf '%s\n' \
     'package consumer' \
     'import (' \
     '  "context"' \
-    '  "github.com/faustbrian/golib/pkg/audit"' \
-    '  "github.com/faustbrian/golib/pkg/audit/memory"' \
+    '  "github.com/faustbrian/go-audit"' \
+    '  "github.com/faustbrian/go-audit/memory"' \
     ')' \
     'var _ = context.Background' \
     'var _ = audit.NewBuilder' \
@@ -41,17 +41,17 @@ mkdir "${temporary}/postgres"
 cd "${temporary}/postgres"
 GOWORK=off go mod init example.com/audit-postgres-consumer
 GOWORK=off go mod edit \
-    -require=github.com/faustbrian/golib/pkg/audit@v0.0.0 \
-    -require=github.com/faustbrian/golib/pkg/audit/postgres@v0.0.0 \
-    -require=github.com/faustbrian/golib/pkg/postgres@v0.0.0 \
-    -replace="github.com/faustbrian/golib/pkg/audit=${root}" \
-    -replace="github.com/faustbrian/golib/pkg/audit/postgres=${root}/postgres" \
-    -replace="github.com/faustbrian/golib/pkg/postgres=${root}/../postgres"
+    -require=github.com/faustbrian/go-audit@v0.0.0 \
+    -require=github.com/faustbrian/go-audit/postgres@v0.0.0 \
+    -require=github.com/faustbrian/go-postgresql@v0.0.0 \
+    -replace="github.com/faustbrian/go-audit=${root}" \
+    -replace="github.com/faustbrian/go-audit/postgres=${root}/postgres" \
+    -replace="github.com/faustbrian/go-postgresql=${root}/../postgres"
 mkdir consumer
 printf '%s\n' \
     'package consumer' \
     'import (' \
-    '  "github.com/faustbrian/golib/pkg/audit/postgres"' \
+    '  "github.com/faustbrian/go-audit/postgres"' \
     ')' \
     'var _ = postgres.New' \
     'var _ = postgres.NewTx' \

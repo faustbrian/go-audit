@@ -2,11 +2,11 @@
 set -euo pipefail
 
 root="$(git rev-parse --show-toplevel)"
-module="pkg/audit/postgres"
+module="postgres"
 matrix="${root}/${module}/testdata/postgres-images.tsv"
 artifact="${root}/.artifacts/${module}/postgres-matrix"
 execution_revision="$(git -C "${root}" rev-parse HEAD)"
-go_version="$("${root}/pkg/audit/scripts/with-gocache.sh" go env GOVERSION)"
+go_version="$("${root}/scripts/with-gocache.sh" go env GOVERSION)"
 environment_os="$(uname -s)"
 environment_arch="$(uname -m)"
 temporary_evidence=""
@@ -78,7 +78,7 @@ while read -r version image extra; do
 
     started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     set +e
-    POSTGRES_VERSION="${version}" "${root}/pkg/audit/scripts/with-gocache.sh" \
+    POSTGRES_VERSION="${version}" "${root}/scripts/with-gocache.sh" \
         "${root}/scripts/check-module.sh" "${module}" test 2>&1 | tee "${temporary_log}"
     status=${PIPESTATUS[0]}
     set -e

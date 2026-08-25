@@ -1,9 +1,13 @@
 # Support
 
-Use GitHub issues for reproducible defects and focused proposals. Include the
-module version, Go and adapter versions, bounded configuration, expected and
-actual behavior, and a minimal reproducer without identifiers or sensitive
-record contents. Use private security advisories for vulnerabilities.
+Use GitHub issues for reproducible defects, documentation gaps, and bounded
+feature proposals. Include the module path and version, Go version, platform,
+minimal reproduction, expected behavior, actual behavior, and relevant
+non-secret logs.
 
-This open-source project provides no response-time SLA and is not a managed
-audit, archival, compliance, or incident-response service.
+Use GitHub Discussions for adoption questions and design exploration. Use the
+private process in [`SECURITY.md`](SECURITY.md) for vulnerabilities.
+
+Support covers released module versions according to
+[`COMPATIBILITY.md`](COMPATIBILITY.md). Unreleased main-branch behavior may
+change while remediation gates are incomplete.

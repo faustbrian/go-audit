@@ -1,4 +1,4 @@
-module github.com/faustbrian/golib/pkg/audit
+module github.com/faustbrian/go-audit
 
 go 1.26.6
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/faustbrian/golib/pkg/audit"
+	"github.com/faustbrian/go-audit"
 )
 
 func BenchmarkBoundedQueryConstruction(b *testing.B) {

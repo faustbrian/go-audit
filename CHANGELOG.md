@@ -5,6 +5,12 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-08-25
+
+### Changed
+
+- Publish the module from its standalone `github.com/faustbrian/go-audit` identity while preserving its documented API and behavior.
+
 ### Documentation
 
 - Link the package README to the repository-wide Golib documentation portal.
@@ -48,3 +54,6 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 - Preserve cursor round trips for newline-bearing durable record IDs and reject
   timestamps whose UTC canonicalization leaves the supported year range.
+
+[Unreleased]: https://github.com/faustbrian/go-audit/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/faustbrian/go-audit/releases/tag/v1.0.0

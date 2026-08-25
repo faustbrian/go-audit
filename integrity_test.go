@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/audit"
+	"github.com/faustbrian/go-audit"
 )
 
 func TestChainSealsAndVerifiesPartitionedRecordsAcrossKeyRotation(t *testing.T) {
