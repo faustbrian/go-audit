@@ -33,7 +33,7 @@ github.com/docker/go-units v0.5.0 h1:69rxXcBk27SvSaaxTtLh/8llcHD8vYHT7WSdRZ/jvr4
 github.com/docker/go-units v0.5.0/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
 github.com/ebitengine/purego v0.10.0 h1:QIw4xfpWT6GWTzaW5XEKy3HXoqrJGx1ijYHzTF0/ISU=
 github.com/ebitengine/purego v0.10.0/go.mod h1:iIjxzd6CiRiOG0UyXP+V1+jWqUXVjPKLAI0mRfJZTmQ=
-github.com/faustbrian/go-audit v1.0.0 h1:SgynTXWSqz28OaPU/VXOh0bCktTMvyjeJhITFYVW2Wc=
+github.com/faustbrian/go-audit v1.0.0 h1:Kgxi1v0MV7sO02TSx/m0bDdaMSHavzoG28CEl9BD84c=
 github.com/faustbrian/go-audit v1.0.0/go.mod h1:IrR+KzmsdkEizekCStgGor5Mqj4OfAj25REXAqDJ540=
 github.com/faustbrian/go-postgres v1.0.1 h1:jnWfPQN3Rpl8NAbWi0C4RkoUWeZT/tnrPFmBKH+Fqg8=
 github.com/faustbrian/go-postgres v1.0.1/go.mod h1:sqcw3nP/8IEz5z4MgrREwfKGm+cSna52TwVEzayyBcs=
