@@ -4,7 +4,7 @@ go 1.26.6
 
 require (
 	github.com/faustbrian/go-audit v1.0.0
-	github.com/faustbrian/go-postgresql v1.0.0
+	github.com/faustbrian/go-postgres v1.0.1
 	github.com/jackc/pgx/v5 v5.10.0
 	go.uber.org/goleak v1.3.0
 )

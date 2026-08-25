@@ -19,7 +19,7 @@ import (
 	"github.com/faustbrian/go-audit"
 	"github.com/faustbrian/go-audit/memory"
 	auditpostgres "github.com/faustbrian/go-audit/postgres"
-	"github.com/faustbrian/go-postgresql/postgrestest"
+	"github.com/faustbrian/go-postgres/postgrestest"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"

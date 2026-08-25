@@ -43,10 +43,10 @@ GOWORK=off go mod init example.com/audit-postgres-consumer
 GOWORK=off go mod edit \
     -require=github.com/faustbrian/go-audit@v0.0.0 \
     -require=github.com/faustbrian/go-audit/postgres@v0.0.0 \
-    -require=github.com/faustbrian/go-postgresql@v0.0.0 \
+    -require=github.com/faustbrian/go-postgres@v0.0.0 \
     -replace="github.com/faustbrian/go-audit=${root}" \
     -replace="github.com/faustbrian/go-audit/postgres=${root}/postgres" \
-    -replace="github.com/faustbrian/go-postgresql=${root}/../postgres"
+    -replace="github.com/faustbrian/go-postgres=${root}/../postgres"
 mkdir consumer
 printf '%s\n' \
     'package consumer' \
