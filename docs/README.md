@@ -9,6 +9,7 @@
 - [Integrity chains, checkpoints, and export verification](integrity.md)
 - [Queries, pagination, and export](query-export.md)
 - [PostgreSQL schema and operations](postgresql.md)
+- [PostgreSQL adapter documentation](../postgres/docs/README.md)
 - [Retention, archival, and legal holds](retention.md)
 - [Incident use](incident-use.md)
 - [FAQ](faq.md)
