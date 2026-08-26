@@ -11,8 +11,8 @@ shown here.
 - This file is the canonical policy for the complete repository.
 - Package policies MAY add stricter domain rules but MUST NOT weaken this file.
 - `CLAUDE.md` and tool-specific files MUST point here rather than duplicate it.
-- Historical `.ai/GOAL*.md` files are requirements and evidence, not proof of
-  completion. Current executable evidence is REQUIRED.
+- Historical implementation plans belong in repository history or issue
+  tracking, not in the released source tree. Current checks MUST pass.
 
 ## Repository Structure
 

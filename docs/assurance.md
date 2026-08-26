@@ -1,4 +1,4 @@
-# Hardening inventory and security review
+# Assurance and security review
 
 The release inventory is the exported API baseline in `api/baseline.txt`, the
 record and canonical structures in `record.go` and `canonical.go`, the sink and

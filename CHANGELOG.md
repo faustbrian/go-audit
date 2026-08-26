@@ -39,10 +39,6 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 - Publish the module from its standalone `github.com/faustbrian/go-audit` identity while preserving its documented API and behavior.
 
-### Documentation
-
-- Link the package README to the repository-wide Golib documentation portal.
-
 ### Added
 
 - Immutable-by-contract bounded audit record construction and canonical JSON.
