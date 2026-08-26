@@ -45,36 +45,6 @@
       "package": ".",
       "replacement_gate_input_digest": "a1044848da4bef333dc04aa25f55c170625b06cc196de5760cc64a45c9f028de",
       "report_sha256": "fd66e39c0f2d4597d5d1a79437cb9f4c1c74a7ba8f87b2b991d0eae59fd42a51"
-    },
-    {
-      "module": ".",
-      "package": ".",
-      "execution_revision": "c09c5268b1facb88317f933913b2e7cf4377948b",
-      "gate_input_digest": "5d3bb1ad4320c3f65766d2967cfaea46d5f7adbf3c40d49aa20961746ef57a9b",
-      "replacement_gate_input_digest": "1b1d04549946bd5e5a9d3e8f0a18391214fff6c97265d7145a4324be3523d5b3",
-      "gremlins_version": "v0.6.0",
-      "gremlins_verifier_sha256": "9a9499ff68a8dfd49a0be7995590297a8ee563a1aa226bfd8b9361dc53058108",
-      "report_sha256": "ba6cc8f1b251d9e22a4552290d3121cdd32938dc774aab625904e23ec87b00b4"
-    },
-    {
-      "module": ".",
-      "package": "memory",
-      "execution_revision": "c09c5268b1facb88317f933913b2e7cf4377948b",
-      "gate_input_digest": "7f2bf844a6cc74e9b5bc10c2c9d8345ec5f6f63c8ec10785c84fccf89ba503db",
-      "replacement_gate_input_digest": "f254efa60b479ff129aa7489713b952981fcb2c29c208df1cad1ebdcbbcdadf6",
-      "gremlins_version": "v0.6.0",
-      "gremlins_verifier_sha256": "9a9499ff68a8dfd49a0be7995590297a8ee563a1aa226bfd8b9361dc53058108",
-      "report_sha256": "2c3cfc5d3682ea540446c55b943be8a9a494c10581d16f55d345f79f9eeceac5"
-    },
-    {
-      "module": "postgres",
-      "package": ".",
-      "execution_revision": "01f2b4d4b916769b7082f70f89cae331be00de00",
-      "gate_input_digest": "52c83c030667e6d23741b0a92c7c47f95def6077c76029021f90f19811835363",
-      "replacement_gate_input_digest": "401261958458c13854d6292db114dbd788d84f393db00373ba2860806837c431",
-      "gremlins_version": "v0.6.0",
-      "gremlins_verifier_sha256": "9a9499ff68a8dfd49a0be7995590297a8ee563a1aa226bfd8b9361dc53058108",
-      "report_sha256": "8bcc5fa5c6a4ec44e2e7d40dd87f4ab775e6d0919c849ba7e0425cfc1a32a831"
     }
   ]
 }
