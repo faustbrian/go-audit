@@ -5,6 +5,18 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 ## [Unreleased]
 
+### Changed
+
+- Replace copied repository tooling with the pinned `go-library-tools` v1.0.4
+  contract while retaining module-owned API and mutation evidence.
+- Keep package-owned documentation and clean-consumer checks as typed
+  verification operations; shared documentation tooling now owns its runtime.
+
+### Documentation
+
+- Remove completed implementation plans from the release tree and retain
+  package-owned documentation as the maintained reference.
+
 ## [1.0.0] - 2026-08-25
 
 ### Changed
@@ -38,10 +50,6 @@ Keep a Changelog, and releases follow Semantic Versioning.
 ### Changed
 
 - Publish the module from its standalone `github.com/faustbrian/go-audit` identity while preserving its documented API and behavior.
-
-### Documentation
-
-- Link the package README to the repository-wide Golib documentation portal.
 
 ### Added
 

@@ -2,11 +2,16 @@
 
 ## [Unreleased]
 
+### Documentation
+
+- Add a module documentation index for direct navigation.
+- Use human-oriented section names and package-owned documentation links.
+
 ## [1.0.0] - 2026-08-25
 
 ### Documentation
 
-- Link the package README to the repository-wide Golib documentation portal.
+- Link the package README to package-owned documentation.
 
 ### Changed
 

@@ -87,10 +87,10 @@ complete existing database protocol rather than a historical executable. A
 future format cannot ship until the matrix also runs the previous released
 reader and writer binaries.
 
-`make integration-matrix` persists one atomic evidence record per major. Each
-record binds the complete test input digest, selected major, immutable image
-digest, execution revision, environment, log digest, and result; the aggregate
-is derived only after all five checkpoints exist.
+The integration-tagged PostgreSQL module gate runs against the default pinned
+18 image. `TestPostgreSQLVersionMatrixUsesImmutableImages` keeps the supported
+14 through 18 image declarations digest-pinned; a full multi-major exercise is
+deployment-owned and must retain equivalent per-major evidence before release.
 
 ## High volume and partitioning boundary
 

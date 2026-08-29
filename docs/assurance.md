@@ -1,4 +1,4 @@
-# Hardening inventory and security review
+# Assurance and security review
 
 The release inventory is the exported API baseline in `api/baseline.txt`, the
 record and canonical structures in `record.go` and `canonical.go`, the sink and
@@ -34,12 +34,13 @@ and least-privilege read/update/delete denial.
 
 The supported PostgreSQL matrix is the upstream-supported majors 14 through 18
 using the digest-pinned current-minor images declared in
-`postgres/testdata/postgres-images.tsv`.
-Run `make integration-matrix`; a missing image, database tool, container runtime,
-or major result is a failure. Race and `goleak` checks cover all packages. Fuzz,
-stress, soak, fault, exact statement coverage, viable mutation, benchmarks,
-security, dependency, documentation, API, and clean-consumer gates are release
-requirements rather than optional warnings.
+`postgres/testdata/postgres-images.tsv`. The integration-tagged PostgreSQL
+module gate runs against the default pinned 18 image, while the version table
+is validated by `TestPostgreSQLVersionMatrixUsesImmutableImages`. Race and
+`goleak` checks cover all packages. Fuzz, stress, soak, fault, exact statement
+coverage, viable mutation, benchmarks, security, dependency, documentation,
+API, and clean-consumer gates are release requirements rather than optional
+warnings.
 
 Benchmarks measure canonical encoding, redaction, single and atomic batch
 append, fully filtered pagination, streaming export, and chain verification.
