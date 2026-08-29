@@ -5,6 +5,13 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 ## [Unreleased]
 
+### Changed
+
+- Replace copied repository tooling with the pinned `go-library-tools` v1.0.4
+  contract while retaining module-owned API and mutation evidence.
+- Keep package-owned documentation and clean-consumer checks as typed
+  verification operations; shared documentation tooling now owns its runtime.
+
 ### Documentation
 
 - Remove completed implementation plans from the release tree and retain

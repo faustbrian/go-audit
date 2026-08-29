@@ -48,6 +48,11 @@ make ci
 The full scheduled and release gate is `make ci`. Report every unavailable or
 failing command; do not describe partial results as release-ready.
 
+Repository verification is provided by the pinned `go-library-tools` release.
+Use `golib check --module postgres` for a module-scoped run when investigating
+the PostgreSQL adapter; do not replace the repository-owned configuration or
+verification evidence with local tooling.
+
 ## Adding A Module
 
 Follow [repository structure policy](AGENTS.md#repository-structure). New modules
