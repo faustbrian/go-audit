@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "repository": "github.com/faustbrian/go-audit",
+  "module": "postgres",
+  "package": ".",
+  "gate": "mutation",
+  "input_digest": "sha256:66b6b56d7952c05512e4e8bd09d3a54a81a5c833c358efe187d3a92de92a69ab",
+  "verifier_digest": "sha256:9a9499ff68a8dfd49a0be7995590297a8ee563a1aa226bfd8b9361dc53058108",
+  "result": "passed",
+  "report_digest": "sha256:1e0b485ebc5b7558e688a783d3ad50ed3f45b7101e2960fe662bf814b871c530",
+  "environment": {
+    "CGO_ENABLED": "1",
+    "GOARCH": "arm64",
+    "GOOS": "darwin",
+    "GOVERSION": "go1.26.6",
+    "gremlins_binary_sha256": "sha256:e05bf25d661b16ab96d6f2e17aed481d393930e0f24205cc341b010f887368a0"
+  },
+  "completed_at": "2026-09-03T12:36:20.090107Z"
+}

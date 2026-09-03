@@ -4,12 +4,14 @@
 
 ### Changed
 
+- Resolve the released `go-audit` v1.0.0 and `go-postgres` v1.0.1
+  dependencies through their public proxy and SumDB identities.
 - Adopt schema-v2 cohesion metadata and the checksum-verified shared cohesion
   gate without changing the PostgreSQL adapter API or runtime behavior.
 
 ### Documentation
 
-- Link the adapter to the immutable v1.3.0 Golib ecosystem guidance.
+- Link the adapter to the immutable v1.4.0 Golib ecosystem guidance.
 - Add a module documentation index for direct navigation.
 - Use human-oriented section names and package-owned documentation links.
 
