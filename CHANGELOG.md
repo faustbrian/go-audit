@@ -7,13 +7,16 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 ### Changed
 
-- Replace copied repository tooling with the pinned `go-library-tools` v1.0.13
+- Adopt schema-v2 cohesion metadata and a local cohesion gate for both public
+  modules, backed by the checksum-verified `go-library-tools` v1.3.0 release.
+- Replace copied repository tooling with the pinned `go-library-tools` v1.3.0
   contract while retaining module-owned API and mutation evidence.
 - Keep package-owned documentation and clean-consumer checks as typed
   verification operations; shared documentation tooling now owns its runtime.
 
 ### Documentation
 
+- Link both modules to the immutable v1.3.0 Golib ecosystem guidance.
 - Remove completed implementation plans from the release tree and retain
   package-owned documentation as the maintained reference.
 
