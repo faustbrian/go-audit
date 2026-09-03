@@ -2,8 +2,14 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Adopt schema-v2 cohesion metadata and the checksum-verified shared cohesion
+  gate without changing the PostgreSQL adapter API or runtime behavior.
+
 ### Documentation
 
+- Link the adapter to the immutable v1.3.0 Golib ecosystem guidance.
 - Add a module documentation index for direct navigation.
 - Use human-oriented section names and package-owned documentation links.
 

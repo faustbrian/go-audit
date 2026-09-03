@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "repository": "github.com/faustbrian/go-audit",
   "go_version": "1.26.6",
   "modules": [
@@ -74,6 +74,81 @@
         "race": true,
         "security": true,
         "tests": true
+      },
+      "cohesion": {
+        "family": "persistence-and-durability",
+        "secondary_capabilities": [
+          "cryptography-and-secrets",
+          "data-encoding",
+          "database-and-storage",
+          "observability"
+        ],
+        "responsibility": "Provide immutable audit records, explicit delivery and redaction policy, integrity verification, bounded query and export contracts, and retention planning without coupling consumers to a storage backend.",
+        "non_goals": [
+          "Act as generic logging, tracing, metrics, event-sourcing history, a storage implementation, or proof of regulatory compliance."
+        ],
+        "public_package_identifier": "audit",
+        "primary_entry_packages": [
+          "github.com/faustbrian/go-audit"
+        ],
+        "package_selection": {
+          "github.com/faustbrian/go-audit": "Use for infrastructure-neutral audit record, delivery, redaction, integrity, query, export, and retention contracts; select the memory package only for bounded process-local testing and the PostgreSQL module for durable storage."
+        },
+        "lifecycle_status": "active",
+        "maturity": "stable",
+        "construction_styles": [
+          "builder-build",
+          "new-config",
+          "plain-function",
+          "validated-value"
+        ],
+        "lifecycle_styles": [
+          "stateless"
+        ],
+        "ownership": {
+          "configuration": "caller",
+          "mutable_inputs": [
+            "borrow",
+            "copy"
+          ],
+          "runtime_resources": "caller",
+          "background_work": "none"
+        },
+        "optional_owned_dependencies": [],
+        "adapters": [
+          "github.com/faustbrian/go-audit/postgres"
+        ],
+        "companions": [],
+        "supported_go": {
+          "minimum": "1.26.6",
+          "tested": [
+            "1.26.6"
+          ]
+        },
+        "supported_platforms": [
+          "portable-go"
+        ],
+        "supported_backends": [],
+        "supported_protocols": [],
+        "documentation": {
+          "readme": "README.md",
+          "api": "docs/api.md",
+          "adoption": "docs/adoption.md",
+          "security": "docs/assurance.md",
+          "compatibility": "docs/assurance.md",
+          "performance": "docs/assurance.md",
+          "examples": "docs/adoption.md",
+          "faq": "docs/faq.md",
+          "changelog": "CHANGELOG.md",
+          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-audit",
+          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.3.0/docs/ecosystem/README.md"
+        },
+        "known_good_compatibility_sets": [],
+        "delivery": {
+          "implementation": "not-started",
+          "hardening": "not-started",
+          "release": "not-started"
+        }
       }
     },
     {
@@ -137,6 +212,78 @@
         "race": true,
         "security": true,
         "tests": true
+      },
+      "cohesion": {
+        "family": "persistence-and-durability",
+        "secondary_capabilities": [
+          "administration-and-control",
+          "cryptography-and-secrets",
+          "database-and-storage"
+        ],
+        "responsibility": "Persist audit records in append-only PostgreSQL storage with idempotent insertion, bounded query and export behavior, caller-owned transaction staging, and legal-hold-aware retention.",
+        "non_goals": [
+          "Own PostgreSQL pools, commit caller transactions, manage deployment role lifecycles, or replace the core audit record and policy contracts."
+        ],
+        "public_package_identifier": "postgres",
+        "primary_entry_packages": [
+          "github.com/faustbrian/go-audit/postgres"
+        ],
+        "package_selection": {
+          "github.com/faustbrian/go-audit/postgres": "Use when the core audit contracts require durable PostgreSQL persistence, bounded querying and export, caller-owned transaction staging, and separately privileged retention administration."
+        },
+        "lifecycle_status": "active",
+        "maturity": "stable",
+        "construction_styles": [
+          "new-config",
+          "plain-function"
+        ],
+        "lifecycle_styles": [
+          "stateless"
+        ],
+        "ownership": {
+          "configuration": "caller",
+          "mutable_inputs": [
+            "borrow",
+            "copy"
+          ],
+          "runtime_resources": "caller",
+          "background_work": "none"
+        },
+        "optional_owned_dependencies": [],
+        "adapters": [],
+        "companions": [],
+        "supported_go": {
+          "minimum": "1.26.6",
+          "tested": [
+            "1.26.6"
+          ]
+        },
+        "supported_platforms": [
+          "portable-go"
+        ],
+        "supported_backends": [
+          "postgresql"
+        ],
+        "supported_protocols": [],
+        "documentation": {
+          "readme": "postgres/README.md",
+          "api": "postgres/docs/README.md",
+          "adoption": "postgres/README.md",
+          "security": "postgres/docs/README.md",
+          "compatibility": "docs/postgresql.md",
+          "performance": "docs/assurance.md",
+          "examples": "postgres/README.md",
+          "faq": "docs/faq.md",
+          "changelog": "postgres/CHANGELOG.md",
+          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-audit/postgres",
+          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.3.0/docs/ecosystem/README.md"
+        },
+        "known_good_compatibility_sets": [],
+        "delivery": {
+          "implementation": "not-started",
+          "hardening": "not-started",
+          "release": "not-started"
+        }
       }
     }
   ]
