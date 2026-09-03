@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "repository": "github.com/faustbrian/go-audit",
+  "module": ".",
+  "package": "memory",
+  "gate": "mutation",
+  "input_digest": "sha256:1fffbb89fc8c6f573535dc8656bfce6d28ee9bae8f19a489ebcd5bf506773325",
+  "verifier_digest": "sha256:9a9499ff68a8dfd49a0be7995590297a8ee563a1aa226bfd8b9361dc53058108",
+  "result": "passed",
+  "report_digest": "sha256:e880519e189f1914ce0de162cdcd1388f34aa8e5dd46458383f85ea05ece134a",
+  "environment": {
+    "CGO_ENABLED": "1",
+    "GOARCH": "arm64",
+    "GOOS": "darwin",
+    "GOVERSION": "go1.26.6",
+    "gremlins_binary_sha256": "sha256:e05bf25d661b16ab96d6f2e17aed481d393930e0f24205cc341b010f887368a0"
+  },
+  "completed_at": "2026-09-03T04:25:37.957431Z"
+}

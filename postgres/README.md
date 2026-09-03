@@ -92,6 +92,6 @@ MIT. See [LICENSE](../LICENSE).
 
 Use the parent [documentation index](../docs/README.md) to find companion
 packages, supported stacks, recipes, and operations guidance.
-The versioned [Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.3.0/docs/ecosystem/README.md)
-and [package-family selection guidance](https://github.com/faustbrian/go-library-tools/blob/v1.3.0/docs/ecosystem/design-language.md#package-families-and-selection)
+The versioned [Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md)
+and [package-family selection guidance](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/design-language.md#package-families-and-selection)
 place this adapter in the shared persistence and durability family.

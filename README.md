@@ -69,8 +69,8 @@ See the [documentation index](docs/README.md), [threat model](docs/threat-model.
 [delivery semantics](docs/delivery.md), [privacy policy boundary](docs/privacy.md),
 and [PostgreSQL operations](docs/postgresql.md).
 
-The versioned [Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.3.0/docs/ecosystem/README.md)
-and [package-family selection guidance](https://github.com/faustbrian/go-library-tools/blob/v1.3.0/docs/ecosystem/design-language.md#package-families-and-selection)
+The versioned [Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md)
+and [package-family selection guidance](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/design-language.md#package-families-and-selection)
 describe the shared design language, related packages, and composition rules.
 
 ## License

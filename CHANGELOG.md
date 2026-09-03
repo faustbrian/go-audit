@@ -7,6 +7,9 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 ### Changed
 
+- Adopt the checksum-verified `go-library-tools` v1.4.0 CLI and immutable
+  reusable workflow so both modules resolve public module identities before
+  using the standalone bootstrap fallback.
 - Adopt schema-v2 cohesion metadata and a local cohesion gate for both public
   modules, backed by the checksum-verified `go-library-tools` v1.3.0 release.
 - Replace copied repository tooling with the pinned `go-library-tools` v1.3.0
@@ -16,7 +19,7 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 ### Documentation
 
-- Link both modules to the immutable v1.3.0 Golib ecosystem guidance.
+- Link both modules to the immutable v1.4.0 Golib ecosystem guidance.
 - Remove completed implementation plans from the release tree and retain
   package-owned documentation as the maintained reference.
 
