@@ -4,9 +4,10 @@ Report vulnerabilities privately through GitHub security advisories. Never put
 credentials, raw authorization headers, request or response bodies, tenant
 data, or exploit details in a public issue.
 
-No version is published yet. Until v1, fixes land on the default branch. After
-v1, the latest v1 patch release is the supported line unless announced
-otherwise.
+The root module and the separately releasable PostgreSQL module each have a
+published v1 line. The latest v1 patch release for each module is supported
+unless announced otherwise. Fixes land on the default branch before the
+affected module is released independently.
 
 Deployers own authentication, authorization, tenancy discovery, transport
 security, database credentials, redaction policy, retention, legal holds,

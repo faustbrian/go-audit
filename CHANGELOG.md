@@ -19,11 +19,13 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 ### Documentation
 
+- Correct the security policy to identify the independently published root and
+  PostgreSQL v1 support lines.
 - Link both modules to the immutable v1.4.0 Golib ecosystem guidance.
 - Remove completed implementation plans from the release tree and retain
   package-owned documentation as the maintained reference.
 
-## [1.0.0] - 2026-08-25
+## [1.0.0] - 2026-08-26
 
 ### Changed
 
