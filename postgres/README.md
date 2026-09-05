@@ -143,14 +143,19 @@ return. Values may be used concurrently where their caller-owned pgx resource
 permits it; a `TxWriter` remains bound to the ownership and concurrency rules
 of its single transaction.
 
-All database operations take `context.Context` first and preserve caller
-cancellation and deadlines. The adapter performs no hidden retry. An unknown
-append outcome must be reconciled by record ID and canonical bytes before a
-caller decides whether to retry. Stable categories support `errors.Is`, while
-`audit.AppendOutcomeOf` distinguishes rejected, committed, and unknown
-durability outcomes. `errors.Is(err, auditpostgres.ErrRetryableTransaction)`
-identifies a transaction that must be retried in full. Database diagnostics
-are deliberately sanitized.
+Application-facing database work takes `context.Context` first and observes
+caller cancellation and deadlines. Rollback cleanup is the deliberate
+exception: once a transaction or savepoint must be aborted, the adapter uses
+`context.WithoutCancel` and a fresh five-second timeout so an already-canceled
+operation cannot strand database resources. That detached context performs
+cleanup only; it does not retry or continue the canceled operation. The
+adapter otherwise performs no hidden retry. An unknown append outcome must be
+reconciled by record ID and canonical bytes before a caller decides whether to
+retry. Stable categories support `errors.Is`, while `audit.AppendOutcomeOf`
+distinguishes rejected, committed, and unknown durability outcomes.
+`errors.Is(err, auditpostgres.ErrRetryableTransaction)` identifies a
+transaction that must be retried in full. Database diagnostics are deliberately
+sanitized.
 
 `NewTx` stages each bounded batch behind a savepoint. Ordinary failures roll
 back that batch; deadlock or serialization failure aborts the whole caller
