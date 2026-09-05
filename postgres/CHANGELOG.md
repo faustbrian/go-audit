@@ -11,6 +11,9 @@
 
 ### Documentation
 
+- Document the canonical module path, exact Go support claim, executable quick
+  start, package selection, ownership, lifecycle, error, security, operations,
+  and ecosystem-navigation contracts in the module entry point.
 - Link the adapter to the immutable v1.4.0 Golib ecosystem guidance.
 - Add a module documentation index for direct navigation.
 - Use human-oriented section names and package-owned documentation links.
