@@ -19,6 +19,9 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 ### Documentation
 
+- Document stable-v1 and Go support, canonical root and PostgreSQL installation,
+  caller-owned lifecycle boundaries, unambiguous tag forms, compiler-checked
+  examples, complete navigation, and live support and security routes.
 - Correct the security policy to identify the independently published root and
   PostgreSQL v1 support lines.
 - Link both modules to the immutable v1.4.0 Golib ecosystem guidance.

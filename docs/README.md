@@ -1,5 +1,8 @@
 # Documentation
 
+- [Package overview and installation](../README.md)
+- [Compiler-checked examples](../examples_test.go)
+- [Go package reference](https://pkg.go.dev/github.com/faustbrian/go-audit)
 - [API and record semantics](api.md)
 - [Adoption patterns and examples](adoption.md)
 - [Delivery and failure modes](delivery.md)
@@ -13,3 +16,9 @@
 - [Retention, archival, and legal holds](retention.md)
 - [Incident use](incident-use.md)
 - [FAQ](faq.md)
+- [Compatibility](../COMPATIBILITY.md)
+- [Support](../SUPPORT.md)
+- [Private vulnerability reporting](../SECURITY.md)
+- [Changelog](../CHANGELOG.md)
+- [Contributor verification](../CONTRIBUTING.md)
+- [License](../LICENSE)
