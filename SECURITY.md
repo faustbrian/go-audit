@@ -1,8 +1,9 @@
 # Security Policy
 
-Report vulnerabilities privately through GitHub security advisories. Never put
-credentials, raw authorization headers, request or response bodies, tenant
-data, or exploit details in a public issue.
+Report vulnerabilities through this repository's
+[private security advisory](https://github.com/faustbrian/go-audit/security/advisories/new)
+form. Never put credentials, raw authorization headers, request or response
+bodies, tenant data, or exploit details in a public issue.
 
 The root module and the separately releasable PostgreSQL module each have a
 published v1 line. The latest v1 patch release for each module is supported

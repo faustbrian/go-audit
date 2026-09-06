@@ -1,7 +1,14 @@
 # Compatibility Policy
 
 Each releasable directory is an independent Go module and follows semantic
-versioning. Tags use `<module-directory>/v<version>`.
+versioning. Root-module releases use `v<version>` tags. The separately
+releasable PostgreSQL module uses `postgres/v<version>` tags. A directory prefix
+is never added to the root module's tag.
+
+The root and PostgreSQL modules are stable v1 libraries. Their minimum supported
+Go version is 1.26.6, and repository verification currently tests exactly Go
+1.26.6. The PostgreSQL adapter supports PostgreSQL 14 through 18 according to
+the digest-pinned matrix in `postgres/testdata/postgres-images.tsv`.
 
 Before `v1`, minor releases MAY contain reviewed breaking changes, but every
 break MUST be documented with migration guidance. Patch releases MUST remain

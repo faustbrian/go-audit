@@ -19,6 +19,21 @@ events, and event-sourcing history. Using an event store does not make that
 store a compliant audit trail, and using this library does not by itself
 establish legal or regulatory compliance.
 
+Both the root library and its separately released PostgreSQL adapter are stable
+v1 modules. Their minimum supported Go version is 1.26.6; repository
+verification currently tests exactly Go 1.26.6.
+
+## Install
+
+Install only the module an application imports:
+
+```sh
+go get github.com/faustbrian/go-audit@v1
+go get github.com/faustbrian/go-audit/postgres@v1
+```
+
+The second command is required only for the PostgreSQL adapter.
+
 ## Packages
 
 - `github.com/faustbrian/go-audit`: records, validation, delivery policy,
@@ -65,9 +80,17 @@ The caller must select fail-closed, fail-open-with-alert, or durable-buffer
 delivery. The library never silently discards a record and performs no hidden
 retry. Repeating the same record ID and canonical bytes is idempotent.
 
+The root module and `memory` adapter start no background goroutines and expose
+no `Close` or `Shutdown` method. Callers own every sink, alerter, durable buffer,
+observer, clock, worker lifecycle, and external resource retained by those
+collaborators. The PostgreSQL adapter likewise retains caller-owned pools and
+transactions; finish in-flight calls before closing or completing them.
+
 See the [documentation index](docs/README.md), [threat model](docs/threat-model.md),
 [delivery semantics](docs/delivery.md), [privacy policy boundary](docs/privacy.md),
-and [PostgreSQL operations](docs/postgresql.md).
+and [PostgreSQL operations](docs/postgresql.md). The
+[compiler-checked examples](examples_test.go) demonstrate builder, recorder,
+integrity-chain, and export use.
 
 The versioned [Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md)
 and [package-family selection guidance](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/design-language.md#package-families-and-selection)

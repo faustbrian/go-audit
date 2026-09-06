@@ -3,12 +3,13 @@ set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 required=(
-    README.md CHANGELOG.md CONTRIBUTING.md LICENSE SECURITY.md SUPPORT.md
-    docs/README.md docs/api.md docs/adoption.md docs/delivery.md
+    README.md CHANGELOG.md COMPATIBILITY.md CONTRIBUTING.md DEPRECATION.md
+    LICENSE SECURITY.md SUPPORT.md examples_test.go docs/README.md docs/api.md
+    docs/adoption.md docs/delivery.md
     docs/threat-model.md docs/privacy.md docs/integrity.md
-    docs/query-export.md docs/postgresql.md docs/retention.md
-    docs/incident-use.md docs/faq.md
-    postgres/README.md postgres/CHANGELOG.md postgres/LICENSE
+    docs/query-export.md docs/postgresql.md docs/retention.md docs/assurance.md
+    docs/incident-use.md docs/faq.md postgres/README.md postgres/CHANGELOG.md
+    postgres/LICENSE postgres/docs/README.md
     scripts/check-clean-consumer.sh
 )
 
@@ -20,10 +21,29 @@ for path in "${required[@]}"; do
     }
 done
 
-packages="$(go list ./...)"
-while IFS= read -r package; do
-	go doc "${package}" >/dev/null
-done <<< "${packages}"
+while IFS=: read -r source match; do
+    link="$(sed -E 's/.*\(([^)]+)\)/\1/' <<<"${match}")"
+    link="${link%%#*}"
+    [[ -z "${link}" || "${link}" == http://* || "${link}" == https://* ]] && continue
+    target="$(dirname "${source}")/${link}"
+    test -e "${target}" || {
+        printf 'broken local documentation link: %s -> %s\n' "${source}" "${link}" >&2
+        exit 1
+    }
+done < <(grep -rEo '\[[^]]+\]\([^)]+\)' \
+    README.md CHANGELOG.md COMPATIBILITY.md CONTRIBUTING.md SECURITY.md \
+    SUPPORT.md docs postgres/README.md postgres/CHANGELOG.md postgres/docs)
+
+for module in . postgres; do
+    (
+        cd "${module}"
+        packages="$(go list ./...)"
+        while IFS= read -r package; do
+            go doc "${package}" >/dev/null
+        done <<< "${packages}"
+        go test ./... -run '^Example' -count=1
+    )
+done
 
 source_list="$(mktemp)"
 trap 'rm -f "${source_list}"' EXIT
