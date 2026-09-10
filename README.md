@@ -7,7 +7,7 @@
 [![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
 [![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-audit.svg)](https://pkg.go.dev/github.com/faustbrian/go-audit)
 [![Release](https://img.shields.io/github/v/release/faustbrian/go-audit?sort=semver)](https://github.com/faustbrian/go-audit/releases)
-[![Go](https://img.shields.io/badge/go-1.26.6-00ADD8?logo=go)](https://go.dev/)
+[![Go](https://img.shields.io/badge/go-1.27.0-00ADD8?logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 `audit` is an infrastructure-neutral Go library for immutable-by-contract,
@@ -20,8 +20,8 @@ store a compliant audit trail, and using this library does not by itself
 establish legal or regulatory compliance.
 
 Both the root library and its separately released PostgreSQL adapter are stable
-v1 modules. Their minimum supported Go version is 1.26.6; repository
-verification currently tests exactly Go 1.26.6.
+v1 modules. Their minimum supported Go version is 1.27.0; repository
+verification currently tests exactly Go 1.27.0.
 
 ## Install
 

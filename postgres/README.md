@@ -14,9 +14,9 @@ The module is stable and released independently with `postgres/v*` repository
 tags. Its canonical module path is
 `github.com/faustbrian/go-audit/postgres`.
 
-The minimum supported Go version is **Go 1.26.6**, matching this module's
+The minimum supported Go version is **Go 1.27.0**, matching this module's
 `go.mod` and the repository support policy. Repository verification currently
-tests Go 1.26.6; other toolchain versions are not part of the recorded support
+tests Go 1.27.0; other toolchain versions are not part of the recorded support
 claim. The adapter supports PostgreSQL 14 through 18. See
 [compatibility and assurance](../docs/assurance.md) for the exact evidence and
 deployment-owned boundaries.

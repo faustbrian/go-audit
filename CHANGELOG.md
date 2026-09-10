@@ -7,6 +7,8 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 ### Changed
 
+- Require Go 1.27.0 for both modules and repository verification.
+
 - Adopt the checksum-verified `go-library-tools` v1.4.0 CLI and immutable
   reusable workflow so both modules resolve public module identities before
   using the standalone bootstrap fallback.
