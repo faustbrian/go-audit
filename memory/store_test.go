@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/go-audit"
-	"github.com/faustbrian/go-audit/memory"
+	"github.com/faustbrian/go-audit/v2"
+	"github.com/faustbrian/go-audit/v2/memory"
 )
 
 func TestStoreAppendIsIdempotentByRecordIDAndRejectsConflicts(t *testing.T) {

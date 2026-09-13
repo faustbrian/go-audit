@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/go-audit"
+	"github.com/faustbrian/go-audit/v2"
 )
 
 func TestRecordPreservesCompleteContextAndIdentitySemantics(t *testing.T) {

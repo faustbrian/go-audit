@@ -18,6 +18,10 @@ const (
 	IntegrityHMACSHA256
 )
 
+// MaxIntegrityRecords is the absolute number of records one chain verification
+// or Merkle-root operation accepts.
+const MaxIntegrityRecords = 1_000
+
 var ErrKeyUnavailable = errors.New("audit: integrity key is unavailable")
 
 // IntegrityKey is external key-rotation metadata. Bytes are copied and never
@@ -35,7 +39,9 @@ type KeyRequest struct {
 	RecordedAt time.Time
 }
 
-// KeyProvider selects an HMAC key for a bounded request.
+// KeyProvider selects an HMAC key for a bounded request. Implementations are
+// caller-owned synchronous dependencies: they must honor context cancellation,
+// bound their own latency and resource use, and support concurrent calls.
 type KeyProvider interface {
 	Key(context.Context, KeyRequest) (IntegrityKey, error)
 }
@@ -154,7 +160,7 @@ func (chain *Chain) Verify(ctx context.Context, records []Record) error {
 		chain.observeInvalid(ctx, ErrIntegrityInvalid)
 		return ErrIntegrityInvalid
 	}
-	if len(records) == 0 {
+	if len(records) == 0 || len(records) > MaxIntegrityRecords {
 		chain.observeInvalid(ctx, ErrIntegrityInvalid)
 		return ErrIntegrityInvalid
 	}
@@ -182,6 +188,10 @@ func (chain *Chain) VerifyFromCheckpoint(ctx context.Context, previous Checkpoin
 		return ErrIntegrityInvalid
 	}
 	if expectedFinal.sequence < previous.sequence {
+		chain.observeInvalid(ctx, ErrIntegrityInvalid)
+		return ErrIntegrityInvalid
+	}
+	if uint64(len(records)) > ^uint64(0)-previous.sequence || len(records) > MaxIntegrityRecords {
 		chain.observeInvalid(ctx, ErrIntegrityInvalid)
 		return ErrIntegrityInvalid
 	}
@@ -256,8 +266,8 @@ func safeKeyFailure(err error) (result error) {
 // MerkleRoot returns an order-sensitive deterministic SHA-256 Merkle root over
 // canonical record bytes. Odd levels duplicate their final node.
 func MerkleRoot(records []Record) ([]byte, error) {
-	if len(records) == 0 {
-		return nil, invalid("merkle_records", "must not be empty")
+	if len(records) == 0 || len(records) > MaxIntegrityRecords {
+		return nil, invalid("merkle_records", "must contain a bounded record count")
 	}
 	nodes := make([][]byte, len(records))
 	for index, record := range records {

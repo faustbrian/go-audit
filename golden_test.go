@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/go-audit"
+	"github.com/faustbrian/go-audit/v2"
 )
 
 func TestCanonicalGoldenRecordAndIndependentChainDigest(t *testing.T) {

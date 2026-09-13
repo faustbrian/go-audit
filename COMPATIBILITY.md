@@ -5,10 +5,18 @@ versioning. Root-module releases use `v<version>` tags. The separately
 releasable PostgreSQL module uses `postgres/v<version>` tags. A directory prefix
 is never added to the root module's tag.
 
-The root and PostgreSQL modules are stable v1 libraries. Their minimum supported
-Go version is 1.27.0, and repository verification currently tests exactly Go
-1.27.0. The PostgreSQL adapter supports PostgreSQL 14 through 18 according to
-the digest-pinned matrix in `postgres/testdata/postgres-images.tsv`.
+The published root and PostgreSQL modules are stable v1 libraries. This source
+tree prepares the planned `github.com/faustbrian/go-audit/v2` root module
+because bounded integrity verification changes previously accepted behavior.
+Version 2 is not available until a `v2.0.0` release is published. Existing
+consumers, including the independently released PostgreSQL module, must remain
+on root v1 until then; local `replace` directives must not bridge the
+unpublished boundary.
+
+The modules require Go 1.27.0, and repository verification currently tests
+exactly Go 1.27.0. The PostgreSQL adapter supports PostgreSQL 14 through 18
+according to the digest-pinned matrix in
+`postgres/testdata/postgres-images.tsv`.
 
 Before `v1`, minor releases MAY contain reviewed breaking changes, but every
 break MUST be documented with migration guidance. Patch releases MUST remain

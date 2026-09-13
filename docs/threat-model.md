@@ -18,6 +18,11 @@ duplicates rejectable. Commit errors remain unknown until reconciled.
 Canonical encoding plus optional chains, external checkpoints, and Merkle roots
 detect alteration, duplication, reordering, missing links, truncation, and
 backdated records only relative to independently retained ordering evidence.
+Each integrity verification or Merkle-root operation accepts at most 1,000
+records before allocating or invoking a key provider. Cancellation is checked
+between verification records. A key provider or observer that ignores context
+can still block its calling goroutine because the library does not detach
+caller callbacks into leak-prone background goroutines.
 They do not prevent a compromised writer from omitting a record or a privileged
 operator from replacing both the database and its co-located checkpoints.
 Readers and export consumers can exfiltrate everything they are authorized to
