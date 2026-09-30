@@ -2,7 +2,7 @@
 
 - [Package overview and installation](../README.md)
 - [Compiler-checked examples](../examples_test.go)
-- [Go package reference](https://pkg.go.dev/github.com/faustbrian/go-audit)
+- [Go package reference](https://pkg.go.dev/github.com/faustbrian/go-audit/v2)
 - [API and record semantics](api.md)
 - [Adoption patterns and examples](adoption.md)
 - [Delivery and failure modes](delivery.md)

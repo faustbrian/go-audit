@@ -3,12 +3,14 @@
 All notable changes to this module will be documented here. The format follows
 Keep a Changelog, and releases follow Semantic Versioning.
 
-## [Unreleased] - root v2.0.0
+## [Unreleased]
 
-The root source tree now uses the `/v2` module path. Root v2 remains
-unpublished until its release gates pass and its tag is published. Existing root,
-PostgreSQL, and external consumers must remain on released v1 without local
-`replace` directives.
+## [2.0.0] - 2026-09-30
+
+The root module uses `/v2` imports and bounded integrity operations. The
+independent PostgreSQL adapter remains on root v1 and cannot accept v2 records.
+See `COMPATIBILITY.md` for migration; do not bridge major module paths with
+local `replace` directives.
 
 ### Added
 
@@ -125,5 +127,6 @@ PostgreSQL, and external consumers must remain on released v1 without local
 - Preserve cursor round trips for newline-bearing durable record IDs and reject
   timestamps whose UTC canonicalization leaves the supported year range.
 
-[Unreleased]: https://github.com/faustbrian/go-audit/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/faustbrian/go-audit/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/faustbrian/go-audit/releases/tag/v2.0.0
 [1.0.0]: https://github.com/faustbrian/go-audit/releases/tag/v1.0.0
