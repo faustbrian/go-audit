@@ -261,6 +261,32 @@ func TestIntegrityBatchOperationsAcceptTheExactPublicCeiling(t *testing.T) {
 	})
 }
 
+func TestIntegrityCheckpointSuffixAcceptsTheMaximumSequence(t *testing.T) {
+	t.Parallel()
+	chain, err := audit.NewChain(audit.ChainConfig{Algorithm: audit.IntegritySHA256})
+	if err != nil {
+		t.Fatal(err)
+	}
+	previousDigest := make([]byte, sha256.Size)
+	previous, err := audit.NewCheckpoint("tenant-1", ^uint64(0)-1, previousDigest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	record, err := chain.Seal(context.Background(), integrityRecord(t, "maximum-sequence", time.Now()), audit.ChainLink{
+		Partition: "tenant-1", Sequence: ^uint64(0), PreviousDigest: previousDigest,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	final, err := audit.NewCheckpoint("tenant-1", ^uint64(0), record.Integrity().Digest())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := chain.VerifyFromCheckpoint(context.Background(), previous, []audit.Record{record}, final); err != nil {
+		t.Fatalf("valid suffix ending at maximum sequence: %v", err)
+	}
+}
+
 func TestIntegrityVerificationRejectsMissingDuplicateReorderedAlteredAndPartialArchives(t *testing.T) {
 	t.Parallel()
 

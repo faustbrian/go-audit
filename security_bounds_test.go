@@ -67,3 +67,36 @@ func TestBuilderByteLimitsPrecedeTextAndPrivacyValidation(t *testing.T) {
 		t.Fatalf("oversized prohibited key error = %v", err)
 	}
 }
+
+func TestBuilderMapByteBudgetIncludesEveryKeyAndValue(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct {
+		name        string
+		budget      int
+		attributes  map[string]string
+		wantInvalid bool
+	}{
+		{name: "exact key-only ceiling", budget: 16, attributes: map[string]string{strings.Repeat("a", 16): ""}},
+		{name: "exact cumulative ceiling", budget: 15, attributes: map[string]string{"a": "xxxx", "b": "xxxx", "c": "xxxx"}},
+		{name: "cumulative entries exceed ceiling", budget: 12, attributes: map[string]string{"a": "xxxx", "b": "xxxx", "c": "xxxx"}, wantInvalid: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			limits := audit.DefaultLimits()
+			limits.MaxAttributeBytes = tc.budget
+			builder, err := audit.NewBuilder(audit.BuilderConfig{Limits: limits})
+			if err != nil {
+				t.Fatal(err)
+			}
+			input := securityInput(audit.IntegrityInput{}, nil)
+			input.Attributes = tc.attributes
+			_, err = builder.Build(input)
+			if tc.wantInvalid {
+				if !errors.Is(err, audit.ErrInvalidArgument) {
+					t.Fatalf("over-budget map error = %v, want ErrInvalidArgument", err)
+				}
+			} else if err != nil {
+				t.Fatalf("exact-budget map error = %v", err)
+			}
+		})
+	}
+}

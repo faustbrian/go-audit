@@ -671,18 +671,18 @@ func validateMap(name string, first, second map[string]string, maxEntries, maxBy
 	if len(first)+len(second) > maxEntries {
 		return invalid(name, "has too many entries")
 	}
-	total := 0
+	remaining := maxBytes
 	// Bound all text before scanning or allocating normalization buffers.
 	for _, values := range []map[string]string{first, second} {
 		for key, value := range values {
-			if len(key) > maxBytes-total {
+			if len(key) > remaining {
 				return invalid(name, "exceeds byte limit")
 			}
-			total += len(key)
-			if len(value) > maxBytes-total {
+			remaining -= len(key)
+			if len(value) > remaining {
 				return invalid(name, "exceeds byte limit")
 			}
-			total += len(value)
+			remaining -= len(value)
 		}
 	}
 	for _, values := range []map[string]string{first, second} {
