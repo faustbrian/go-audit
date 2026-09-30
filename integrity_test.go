@@ -206,7 +206,7 @@ func TestIntegrityBatchOperationsAcceptTheExactPublicCeiling(t *testing.T) {
 		t.Fatal(err)
 	}
 	base := time.Date(2026, time.August, 9, 12, 0, 0, 0, time.UTC)
-	records := make([]audit.Record, audit.MaxIntegrityRecords+1)
+	records := make([]audit.Record, audit.MaxIntegrityRecords+2)
 	for index := range records {
 		link := audit.ChainLink{Partition: "tenant-1", Sequence: uint64(index + 1)}
 		if index > 0 {
@@ -229,17 +229,36 @@ func TestIntegrityBatchOperationsAcceptTheExactPublicCeiling(t *testing.T) {
 		t.Fatal(err)
 	}
 	final, err := audit.NewCheckpoint(
-		"tenant-1", uint64(len(records)), records[len(records)-1].Integrity().Digest(),
+		"tenant-1", uint64(audit.MaxIntegrityRecords+1), records[audit.MaxIntegrityRecords].Integrity().Digest(),
 	)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := chain.VerifyFromCheckpoint(context.Background(), previous, records[1:], final); err != nil {
+	if err := chain.VerifyFromCheckpoint(context.Background(), previous, records[1:audit.MaxIntegrityRecords+1], final); err != nil {
 		t.Fatalf("VerifyFromCheckpoint(exact ceiling) error = %v", err)
 	}
 	if _, err := audit.MerkleRoot(records[:audit.MaxIntegrityRecords]); err != nil {
 		t.Fatalf("MerkleRoot(exact ceiling) error = %v", err)
 	}
+	t.Run("valid oversized chain", func(t *testing.T) {
+		if err := chain.Verify(context.Background(), records[:audit.MaxIntegrityRecords+1]); !errors.Is(err, audit.ErrIntegrityInvalid) {
+			t.Fatalf("Verify(valid oversized chain) error = %v, want ErrIntegrityInvalid", err)
+		}
+	})
+	t.Run("valid oversized suffix", func(t *testing.T) {
+		oversizedFinal, err := audit.NewCheckpoint("tenant-1", uint64(len(records)), records[len(records)-1].Integrity().Digest())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := chain.VerifyFromCheckpoint(context.Background(), previous, records[1:], oversizedFinal); !errors.Is(err, audit.ErrIntegrityInvalid) {
+			t.Fatalf("VerifyFromCheckpoint(valid oversized suffix) error = %v, want ErrIntegrityInvalid", err)
+		}
+	})
+	t.Run("valid oversized Merkle input", func(t *testing.T) {
+		if _, err := audit.MerkleRoot(records[:audit.MaxIntegrityRecords+1]); !errors.Is(err, audit.ErrInvalidArgument) {
+			t.Fatalf("MerkleRoot(valid oversized input) error = %v, want ErrInvalidArgument", err)
+		}
+	})
 }
 
 func TestIntegrityVerificationRejectsMissingDuplicateReorderedAlteredAndPartialArchives(t *testing.T) {

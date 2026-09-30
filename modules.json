@@ -34,9 +34,9 @@
         }
       ],
       "purpose": "`audit` is an infrastructure-neutral Go library for immutable-by-contract, security-relevant and business-relevant records. It records who did what, to which stable resource, when, from where, and with what outcome.",
-      "lifecycle": "planned",
+      "lifecycle": "stable",
       "kind": "public library",
-      "releasable": false,
+      "releasable": true,
       "family": "persistence-and-durability",
       "family_label": "Persistence And Durability",
       "family_description": "Durable state, delivery, coordination, recovery, and operational lifecycle.",
@@ -88,10 +88,10 @@
           "github.com/faustbrian/go-audit/v2"
         ],
         "package_selection": {
-          "github.com/faustbrian/go-audit/v2": "Use for infrastructure-neutral audit record, delivery, redaction, integrity, query, export, and retention contracts; select the memory package only for bounded process-local testing and the PostgreSQL module for durable storage."
+          "github.com/faustbrian/go-audit/v2": "Use for infrastructure-neutral audit record, delivery, redaction, integrity, query, export, and retention contracts; select memory for bounded process-local testing. The independently released PostgreSQL module uses root v1 types, not v2."
         },
-        "lifecycle_status": "planned",
-        "maturity": "preview",
+        "lifecycle_status": "active",
+        "maturity": "stable",
         "construction_styles": [
           "builder-build",
           "new-config",
@@ -111,9 +111,7 @@
           "background_work": "none"
         },
         "optional_owned_dependencies": [],
-        "adapters": [
-          "github.com/faustbrian/go-audit/postgres"
-        ],
+        "adapters": [],
         "companions": [],
         "supported_go": {
           "minimum": "1.27.0",
@@ -136,14 +134,14 @@
           "examples": "docs/adoption.md",
           "faq": "docs/faq.md",
           "changelog": "CHANGELOG.md",
-          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-audit",
+          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-audit/v2",
           "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md"
         },
         "known_good_compatibility_sets": [],
         "delivery": {
           "implementation": "not-started",
           "hardening": "not-started",
-          "release": "blocked"
+          "release": "not-started"
         }
       }
     },

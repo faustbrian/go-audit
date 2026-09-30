@@ -1,7 +1,7 @@
 # Assurance and security review
 
 The released-v1 inventory is preserved in `api/baseline.txt`; the active
-planned-v2 API baseline is `api/v2.txt`. The implementation inventory is the
+v2 API baseline is `api/v2.txt`. The implementation inventory is the
 record and canonical structures in `record.go` and `canonical.go`, the sink and
 delivery contracts in `sink.go` and `delivery.go`, privacy in `privacy.go`,
 query and export in `query.go`, integrity in `integrity.go`, retention in

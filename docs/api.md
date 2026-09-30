@@ -1,5 +1,10 @@
 # API and record semantics
 
+This source tree documents the root-v2 API. PostgreSQL references describe
+the independent root-v1 adapter's storage conventions, not a v2 integration.
+No currently released PostgreSQL adapter accepts v2 records; v2 consumers need
+application-owned storage integration pending a separate adapter migration.
+
 `Builder` is the only public constructor for `Record`. It validates all
 required identities, bounds, maps, privacy namespaces, changes, and integrity
 metadata, then owns mutable inputs. Map and digest accessors return copies.

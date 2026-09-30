@@ -5,8 +5,8 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 ## [Unreleased] - root v2.0.0
 
-The root source tree now uses the planned `/v2` module path. Root v2 remains
-unpublished and non-releasable until its release gates pass. Existing root,
+The root source tree now uses the `/v2` module path. Root v2 remains
+unpublished until its release gates pass and its tag is published. Existing root,
 PostgreSQL, and external consumers must remain on released v1 without local
 `replace` directives.
 
@@ -19,6 +19,10 @@ PostgreSQL, and external consumers must remain on released v1 without local
 
 - Reject oversized integrity batches before allocation or caller key lookup,
   and reject checkpoint sequence overflow before range verification.
+- Reject oversized record text and map inputs before scanning or allocating
+  normalization and encoding buffers, including permissive field budgets.
+- Document conditional resource, privacy, callback, and database risks with
+  explicit owners, mitigations, and review conditions.
 - Record ownership, mitigation, and review conditions for synchronous key,
   observation, and export-consumer callbacks.
 

@@ -1,5 +1,10 @@
 # PostgreSQL adapter and operations
 
+This guide describes the independently released PostgreSQL v1 adapter, which
+uses root-v1 record types. It cannot accept root-v2 records. Root-v2 consumers
+need application-owned storage integration until a separately reviewed adapter
+migration is released.
+
 The separate `audit/postgres` module embeds append-only forward migrations. It
 creates `audit.records`, stable query indexes, immutable retention events,
 update rejection, legal-hold-aware pruning, canonical projections and digests,

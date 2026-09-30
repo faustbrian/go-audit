@@ -5,8 +5,10 @@ external operations. Cancellation before an append is a confirmed rejection;
 a commit failure is unknown and must be reconciled by record ID. Validation,
 capacity, duplicate-content conflict, and statement failures before commit are
 confirmed rejections. A successful identical resubmission is reported as a
-duplicate. Sinks preserve input order in bounded batches; the memory and
-PostgreSQL adapters commit a batch atomically and return no partial success.
+duplicate. Sinks preserve input order in bounded batches; the memory adapter
+commits a batch atomically and returns no partial success. The independently
+released root-v1 PostgreSQL adapter provides the same atomicity for v1 records;
+it does not accept root-v2 records.
 
 Core performs no implicit retry. Reconcile unknown outcomes and retry only the
 same immutable record ID and canonical bytes. A different record under the

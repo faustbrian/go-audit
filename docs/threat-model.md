@@ -15,6 +15,12 @@ fail-open-with-alert, and durable-buffer modes make omission visible. Stable
 record IDs and canonical bytes make identical retries idempotent and conflicting
 duplicates rejectable. Commit errors remain unknown until reconciled.
 
+Record validation checks text byte limits before UTF-8 scanning or allocating
+privacy-normalization buffers. Attribute and change-map bytes and descriptions
+are capped by the record-byte ceiling even when a caller configures larger
+field budgets. Caller-owned input allocation and aggregate concurrent request
+admission remain outside this per-operation bound.
+
 Canonical encoding plus optional chains, external checkpoints, and Merkle roots
 detect alteration, duplication, reordering, missing links, truncation, and
 backdated records only relative to independently retained ordering evidence.
@@ -40,3 +46,15 @@ The module does not decide authentication, authorization, read privileges,
 business policy, action vocabularies, transport middleware, tenancy, legal
 holds, erasure exceptions, or regulatory applicability. Deployment-specific
 controls and evidence remain necessary for any compliance claim.
+
+## Conditional residual risks
+
+| Surface | Owner and rationale | Mitigation | Review condition |
+| --- | --- | --- | --- |
+| Actor facts, tenant scope, and omitted events | Application owner; values and explicit scopes are not authentication or proof an action occurred. | Authorize writes and reads, derive identities from trusted context, and reconcile required events. | Before changing identity, tenant routing, or fail-open policy. |
+| Permitted record contents | Application privacy owner; syntactically valid identity fields and explicitly allowed descriptions or attributes can contain secrets. | Use default-deny redaction, restrict allowances, and avoid credentials in all identity fields. | Before adding an allowed field or changing a redactor. |
+| Aggregate resource use | Application operator; per-record and batch bounds do not limit concurrent callers or backend capacity. | Bound admission, memory-store capacity, query costs, and durable-buffer capacity. | Before increasing limits, concurrency, or backend workloads. |
+| Synchronous collaborators | Callback owner; clocks, ID generators, key providers, observers, and sinks are caller implementations, not preemptible library workers. | Keep local callbacks bounded; honor context and use dependency deadlines for blocking work. | Before replacing callbacks or changing latency budgets. |
+| PostgreSQL driver input | Database and adapter operator; the independent v1 adapter receives driver-allocated row values before canonical validation and hashing. | Retain schema byte constraints, least privilege, row-byte and connection limits, and driver deadlines. | Before changing schema privileges, drivers, or accepting an untrusted database. |
+| Integrity evidence and archives | Key and archive custodian; a writer can omit events or replace colocated checkpoints. | Retain independent trusted checkpoints and keys; bound and authorize exports; verify ordered archives. | Before changing custody, archive formats, or retention/legal-hold policy. |
+| Supported dependencies and disclosure | Maintainers; vulnerabilities can arise in dependencies or deployment-specific inputs. | Review advisories and pinned sources, reproduce reported contracts, and coordinate fixes and disclosure. | On a dependency advisory, public release, or new credible report. |
