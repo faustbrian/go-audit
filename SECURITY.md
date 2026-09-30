@@ -10,10 +10,16 @@ published v1 line. The latest v1 patch release for each module is supported
 unless announced otherwise. Fixes land on the default branch before the
 affected module is released independently.
 
-The default branch prepares the v2 root module with bounded integrity and
-record-validation work. Use v2 only after its public release gates pass and a
-`v2.0.0` tag is published. The PostgreSQL module continues to use root v1
+The published v2 root module bounds integrity and record-validation work.
+The latest v2 patch is supported. The PostgreSQL module continues to use root v1
 independently; it does not accept v2 record types.
+
+Root v1.0.0 has no patched v1 release for these work-bound defects. Callers
+remaining on v1 must check text and aggregate map bytes against their configured
+record limits before construction and cap integrity batches at 1,000 records.
+This workaround also applies to applications constructing v1 records for the
+PostgreSQL adapter. Migration to root v2 requires an application-owned storage
+integration until a separately reviewed adapter migration is released.
 
 Maintainers assess reports privately, reproduce the affected public contract,
 and coordinate a fix, affected-version range, migration advice, and disclosure
