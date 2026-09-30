@@ -1,5 +1,10 @@
 # API and record semantics
 
+This source tree documents the root-v2 API. PostgreSQL references describe
+the independent root-v1 adapter's storage conventions, not a v2 integration.
+No currently released PostgreSQL adapter accepts v2 records; v2 consumers need
+application-owned storage integration pending a separate adapter migration.
+
 `Builder` is the only public constructor for `Record`. It validates all
 required identities, bounds, maps, privacy namespaces, changes, and integrity
 metadata, then owns mutable inputs. Map and digest accessors return copies.
@@ -35,11 +40,20 @@ share after construction because mutable inputs and byte/map accessors are
 copied. `Builder`, `Recorder`, and `Chain` own no mutable counters and start no
 goroutines; concurrent use additionally requires injected clocks, generators,
 sinks, redactors, observers, alerters, buffers, and key providers to support the
-same use. The memory adapter serializes mutation with its own context-aware
-gate. PostgreSQL
+same use. Every synchronous collaborator must bound its own latency and resource
+use; context-aware collaborators must stop on cancellation. Builder clocks and
+ID generators receive no context and must remain constant-time and local. The
+memory adapter serializes mutation with its own context-aware gate. PostgreSQL
 adapters rely on the supplied caller-owned pool or transaction and never close
 them.
 
 Builder clock and ID-generator panics are contained. ID-generator failures are
 reported only as `ErrRecordIDUnavailable`; clock panics are reported only as
 `ErrClockUnavailable`. Arbitrary dependency diagnostics are not retained.
+
+`MaxIntegrityRecords` limits each `Chain.Verify`,
+`Chain.VerifyFromCheckpoint`, and `MerkleRoot` operation to 1,000 records. The
+limit bounds local hashing, canonical encoding, allocation, and HMAC key
+lookups. Verification checks cancellation between records. Key providers and
+observers remain caller-owned synchronous dependencies; they must honor the
+supplied context, bound their own latency, and permit concurrent calls.

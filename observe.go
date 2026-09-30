@@ -37,7 +37,9 @@ type Observation struct {
 	Outcome  AppendOutcome
 }
 
-// Observer is a dependency-neutral metrics and tracing hook.
+// Observer is a dependency-neutral metrics and tracing hook. It runs
+// synchronously without library locks; callers must keep it concurrency-safe,
+// non-blocking, and responsive to context cancellation.
 type Observer interface {
 	Observe(context.Context, Observation)
 }

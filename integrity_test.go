@@ -4,11 +4,12 @@ import (
 	"context"
 	"crypto/sha256"
 	"errors"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/faustbrian/go-audit"
+	"github.com/faustbrian/go-audit/v2"
 )
 
 func TestChainSealsAndVerifiesPartitionedRecordsAcrossKeyRotation(t *testing.T) {
@@ -149,6 +150,140 @@ func TestCheckpointAndMerkleVerificationDetectTruncationAndOrder(t *testing.T) {
 	}
 	if string(root) == string(reversed) {
 		t.Fatal("Merkle root ignored stable export order")
+	}
+}
+
+func TestIntegrityBatchOperationsRejectWorkAboveThePublicCeiling(t *testing.T) {
+	t.Parallel()
+
+	providerCalls := 0
+	chain, err := audit.NewChain(audit.ChainConfig{
+		Algorithm: audit.IntegrityHMACSHA256,
+		Keys: audit.KeyProviderFunc(func(context.Context, audit.KeyRequest) (audit.IntegrityKey, error) {
+			providerCalls++
+			return audit.IntegrityKey{ID: "key", Bytes: make([]byte, sha256.Size)}, nil
+		}),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	records := make([]audit.Record, audit.MaxIntegrityRecords+1)
+	if err := chain.Verify(context.Background(), records); !errors.Is(err, audit.ErrIntegrityInvalid) {
+		t.Fatalf("Verify(oversized) error = %v, want ErrIntegrityInvalid", err)
+	}
+	digest := make([]byte, sha256.Size)
+	previous, err := audit.NewCheckpoint("tenant-1", 1, digest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	final, err := audit.NewCheckpoint("tenant-1", uint64(len(records))+1, digest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := chain.VerifyFromCheckpoint(context.Background(), previous, records, final); !errors.Is(err, audit.ErrIntegrityInvalid) {
+		t.Fatalf("VerifyFromCheckpoint(oversized) error = %v, want ErrIntegrityInvalid", err)
+	}
+	overflow, err := audit.NewCheckpoint("tenant-1", ^uint64(0), digest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := chain.VerifyFromCheckpoint(context.Background(), overflow, records[:1], overflow); !errors.Is(err, audit.ErrIntegrityInvalid) {
+		t.Fatalf("VerifyFromCheckpoint(sequence overflow) error = %v, want ErrIntegrityInvalid", err)
+	}
+	if providerCalls != 0 {
+		t.Fatalf("rejected verification called key provider %d times", providerCalls)
+	}
+	if _, err := audit.MerkleRoot(records); !errors.Is(err, audit.ErrInvalidArgument) {
+		t.Fatalf("MerkleRoot(oversized) error = %v, want ErrInvalidArgument", err)
+	}
+}
+
+func TestIntegrityBatchOperationsAcceptTheExactPublicCeiling(t *testing.T) {
+	t.Parallel()
+
+	chain, err := audit.NewChain(audit.ChainConfig{Algorithm: audit.IntegritySHA256})
+	if err != nil {
+		t.Fatal(err)
+	}
+	base := time.Date(2026, time.August, 9, 12, 0, 0, 0, time.UTC)
+	records := make([]audit.Record, audit.MaxIntegrityRecords+2)
+	for index := range records {
+		link := audit.ChainLink{Partition: "tenant-1", Sequence: uint64(index + 1)}
+		if index > 0 {
+			link.PreviousDigest = records[index-1].Integrity().Digest()
+		}
+		records[index], err = chain.Seal(
+			context.Background(),
+			integrityRecord(t, "bounded-"+strconv.Itoa(index), base.Add(time.Duration(index)*time.Microsecond)),
+			link,
+		)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := chain.Verify(context.Background(), records[:audit.MaxIntegrityRecords]); err != nil {
+		t.Fatalf("Verify(exact ceiling) error = %v", err)
+	}
+	previous, err := audit.NewCheckpoint("tenant-1", 1, records[0].Integrity().Digest())
+	if err != nil {
+		t.Fatal(err)
+	}
+	final, err := audit.NewCheckpoint(
+		"tenant-1", uint64(audit.MaxIntegrityRecords+1), records[audit.MaxIntegrityRecords].Integrity().Digest(),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := chain.VerifyFromCheckpoint(context.Background(), previous, records[1:audit.MaxIntegrityRecords+1], final); err != nil {
+		t.Fatalf("VerifyFromCheckpoint(exact ceiling) error = %v", err)
+	}
+	if _, err := audit.MerkleRoot(records[:audit.MaxIntegrityRecords]); err != nil {
+		t.Fatalf("MerkleRoot(exact ceiling) error = %v", err)
+	}
+	t.Run("valid oversized chain", func(t *testing.T) {
+		if err := chain.Verify(context.Background(), records[:audit.MaxIntegrityRecords+1]); !errors.Is(err, audit.ErrIntegrityInvalid) {
+			t.Fatalf("Verify(valid oversized chain) error = %v, want ErrIntegrityInvalid", err)
+		}
+	})
+	t.Run("valid oversized suffix", func(t *testing.T) {
+		oversizedFinal, err := audit.NewCheckpoint("tenant-1", uint64(len(records)), records[len(records)-1].Integrity().Digest())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := chain.VerifyFromCheckpoint(context.Background(), previous, records[1:], oversizedFinal); !errors.Is(err, audit.ErrIntegrityInvalid) {
+			t.Fatalf("VerifyFromCheckpoint(valid oversized suffix) error = %v, want ErrIntegrityInvalid", err)
+		}
+	})
+	t.Run("valid oversized Merkle input", func(t *testing.T) {
+		if _, err := audit.MerkleRoot(records[:audit.MaxIntegrityRecords+1]); !errors.Is(err, audit.ErrInvalidArgument) {
+			t.Fatalf("MerkleRoot(valid oversized input) error = %v, want ErrInvalidArgument", err)
+		}
+	})
+}
+
+func TestIntegrityCheckpointSuffixAcceptsTheMaximumSequence(t *testing.T) {
+	t.Parallel()
+	chain, err := audit.NewChain(audit.ChainConfig{Algorithm: audit.IntegritySHA256})
+	if err != nil {
+		t.Fatal(err)
+	}
+	previousDigest := make([]byte, sha256.Size)
+	previous, err := audit.NewCheckpoint("tenant-1", ^uint64(0)-1, previousDigest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	record, err := chain.Seal(context.Background(), integrityRecord(t, "maximum-sequence", time.Now()), audit.ChainLink{
+		Partition: "tenant-1", Sequence: ^uint64(0), PreviousDigest: previousDigest,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	final, err := audit.NewCheckpoint("tenant-1", ^uint64(0), record.Integrity().Digest())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := chain.VerifyFromCheckpoint(context.Background(), previous, []audit.Record{record}, final); err != nil {
+		t.Fatalf("valid suffix ending at maximum sequence: %v", err)
 	}
 }
 

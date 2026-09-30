@@ -19,7 +19,7 @@ api:
   baselines:
   - module: .
     mode: apidiff
-    path: api/baseline.txt
+    path: api/v2.txt
   - module: postgres
     mode: apidiff
     path: postgres/api/baseline.txt

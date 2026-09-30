@@ -23,6 +23,12 @@ Both the root library and its separately released PostgreSQL adapter are stable
 v1 modules. Their minimum supported Go version is 1.27.0; repository
 verification currently tests exactly Go 1.27.0.
 
+This source tree prepares the `github.com/faustbrian/go-audit/v2` root module.
+Use it only after the v2 release gates pass and its public tag is published;
+do not use local `replace` directives to consume this checkout as v1. The
+PostgreSQL module remains on its independent v1 line and uses root-v1 records.
+See [migration guidance](COMPATIBILITY.md) before adopting bounded v2 behavior.
+
 ## Install
 
 Install only the module an application imports:
@@ -33,6 +39,9 @@ go get github.com/faustbrian/go-audit/postgres@v1
 ```
 
 The second command is required only for the PostgreSQL adapter.
+
+After the public `v2.0.0` release is available, root and memory consumers can
+install `github.com/faustbrian/go-audit/v2@v2.0.0` and use `/v2` imports.
 
 ## Packages
 

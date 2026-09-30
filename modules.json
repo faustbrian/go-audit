@@ -5,14 +5,14 @@
   "modules": [
     {
       "directory": ".",
-      "module_path": "github.com/faustbrian/go-audit",
+      "module_path": "github.com/faustbrian/go-audit/v2",
       "go_version": "1.27.0",
       "packages": [
         {
           "module_directory": ".",
           "directory": ".",
           "name": "audit",
-          "import_path": "github.com/faustbrian/go-audit",
+          "import_path": "github.com/faustbrian/go-audit/v2",
           "kind": "public",
           "production": true,
           "executable": true,
@@ -24,7 +24,7 @@
           "module_directory": ".",
           "directory": "memory",
           "name": "memory",
-          "import_path": "github.com/faustbrian/go-audit/memory",
+          "import_path": "github.com/faustbrian/go-audit/v2/memory",
           "kind": "public",
           "production": true,
           "executable": true,
@@ -41,14 +41,10 @@
       "family_label": "Persistence And Durability",
       "family_description": "Durable state, delivery, coordination, recovery, and operational lifecycle.",
       "family_order": 4,
-      "version": "1.0.0",
+      "version": "2.0.0",
       "tag_prefix": "v",
       "owned_dependencies": [],
-      "reverse_owned_dependencies": [
-        "github.com/faustbrian/go-audit/postgres",
-        "github.com/faustbrian/go-cloudevents/adapters/golib",
-        "github.com/faustbrian/go-service/integration/reference-http"
-      ],
+      "reverse_owned_dependencies": [],
       "external_runtime_dependencies": [
         "go.uber.org/goleak"
       ],
@@ -89,10 +85,10 @@
         ],
         "public_package_identifier": "audit",
         "primary_entry_packages": [
-          "github.com/faustbrian/go-audit"
+          "github.com/faustbrian/go-audit/v2"
         ],
         "package_selection": {
-          "github.com/faustbrian/go-audit": "Use for infrastructure-neutral audit record, delivery, redaction, integrity, query, export, and retention contracts; select the memory package only for bounded process-local testing and the PostgreSQL module for durable storage."
+          "github.com/faustbrian/go-audit/v2": "Use for infrastructure-neutral audit record, delivery, redaction, integrity, query, export, and retention contracts; select memory for bounded process-local testing. The independently released PostgreSQL module uses root v1 types, not v2."
         },
         "lifecycle_status": "active",
         "maturity": "stable",
@@ -115,9 +111,7 @@
           "background_work": "none"
         },
         "optional_owned_dependencies": [],
-        "adapters": [
-          "github.com/faustbrian/go-audit/postgres"
-        ],
+        "adapters": [],
         "companions": [],
         "supported_go": {
           "minimum": "1.27.0",
@@ -140,7 +134,7 @@
           "examples": "docs/adoption.md",
           "faq": "docs/faq.md",
           "changelog": "CHANGELOG.md",
-          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-audit",
+          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-audit/v2",
           "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md"
         },
         "known_good_compatibility_sets": [],
