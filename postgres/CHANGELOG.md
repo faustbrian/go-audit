@@ -4,6 +4,10 @@
 
 ### Changed
 
+- Update runtime pgx to v5.11.0. Custom implementations of `pgx.Rows`
+  must add `TypeMap`; review upstream connection-string and date/time
+  changes before upgrading caller-created pools.
+
 - Resolve the released `go-audit` v1.0.0 and `go-postgres` v1.0.1
   dependencies through their public proxy and SumDB identities.
 - Adopt schema-v2 cohesion metadata and the checksum-verified shared cohesion
