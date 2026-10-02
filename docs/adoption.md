@@ -14,8 +14,12 @@ Choose one delivery policy explicitly:
 3. Durable buffer when an independently durable bounded sink can accept the
    redacted record during primary failure.
 
-For atomic business and audit writes in PostgreSQL, construct a `postgres.TxWriter`
-from the caller-owned transaction and call `Stage` before commit. An outbox may
-carry the same contract through an application-owned coordinator; core does not
+The currently released PostgreSQL adapter accepts root-v1 records only. For
+root-v1 atomic business and audit writes, construct a `postgres.TxWriter` from
+the caller-owned transaction and call `Stage` before commit. No current
+PostgreSQL adapter accepts root-v2 records; v2 consumers need an
+application-owned storage integration pending a separately reviewed adapter
+migration. An outbox may carry the same contract through an application-owned
+coordinator; core does not
 depend on an outbox implementation and does not call an event store an audit
 trail.

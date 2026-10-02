@@ -5,7 +5,7 @@
 [![Coverage](https://img.shields.io/badge/coverage-100%25_required-blue)](CONTRIBUTING.md#verification)
 [![Mutation](https://img.shields.io/badge/mutation-100%25_required-blue)](CONTRIBUTING.md#verification)
 [![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
-[![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-audit.svg)](https://pkg.go.dev/github.com/faustbrian/go-audit)
+[![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-audit/v2.svg)](https://pkg.go.dev/github.com/faustbrian/go-audit/v2)
 [![Release](https://img.shields.io/github/v/release/faustbrian/go-audit?sort=semver)](https://github.com/faustbrian/go-audit/releases)
 [![Go](https://img.shields.io/badge/go-1.27.0-00ADD8?logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -19,26 +19,34 @@ events, and event-sourcing history. Using an event store does not make that
 store a compliant audit trail, and using this library does not by itself
 establish legal or regulatory compliance.
 
-Both the root library and its separately released PostgreSQL adapter are stable
-v1 modules. Their minimum supported Go version is 1.27.0; repository
+The root library's v2 line and the separately released PostgreSQL adapter's v1
+line are stable. Their minimum supported Go version is 1.27.0; repository
 verification currently tests exactly Go 1.27.0.
+
+The published root module is `github.com/faustbrian/go-audit/v2`.
+Do not use local `replace` directives to consume this checkout as v1. The
+PostgreSQL module remains on its independent v1 line and uses root-v1 records.
+See [migration guidance](COMPATIBILITY.md) before adopting bounded v2 behavior.
 
 ## Install
 
 Install only the module an application imports:
 
 ```sh
-go get github.com/faustbrian/go-audit@v1
+go get github.com/faustbrian/go-audit/v2@v2.0.0
 go get github.com/faustbrian/go-audit/postgres@v1
 ```
 
-The second command is required only for the PostgreSQL adapter.
+The second command is required only for the independent PostgreSQL v1 adapter,
+which uses root-v1 types and cannot accept records from root v2. Root-v2
+consumers need application-owned storage integration until an adapter migration
+is released.
 
 ## Packages
 
-- `github.com/faustbrian/go-audit`: records, validation, delivery policy,
+- `github.com/faustbrian/go-audit/v2`: records, validation, delivery policy,
   privacy, querying, export, integrity, retention, and safe observation hooks.
-- `github.com/faustbrian/go-audit/memory`: bounded process-local adapter
+- `github.com/faustbrian/go-audit/v2/memory`: bounded process-local adapter
   for tests; it is not durable.
 - `github.com/faustbrian/go-audit/postgres`: separately releasable
   PostgreSQL durable adapter and caller-owned transaction writer.

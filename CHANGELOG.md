@@ -5,6 +5,29 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-09-30
+
+The root module uses `/v2` imports and bounded integrity operations. The
+independent PostgreSQL adapter remains on root v1 and cannot accept v2 records.
+See `COMPATIBILITY.md` for migration; do not bridge major module paths with
+local `replace` directives.
+
+### Added
+
+- Add `MaxIntegrityRecords` as the common public ceiling for chain verification
+  and Merkle-root construction.
+
+### Security
+
+- Reject oversized integrity batches before allocation or caller key lookup,
+  and reject checkpoint sequence overflow before range verification.
+- Reject oversized record text and map inputs before scanning or allocating
+  normalization and encoding buffers, including permissive field budgets.
+- Document conditional resource, privacy, callback, and database risks with
+  explicit owners, mitigations, and review conditions.
+- Record ownership, mitigation, and review conditions for synchronous key,
+  observation, and export-consumer callbacks.
+
 ### Changed
 
 - Require Go 1.27.0 for both modules and repository verification.
@@ -104,5 +127,6 @@ Keep a Changelog, and releases follow Semantic Versioning.
 - Preserve cursor round trips for newline-bearing durable record IDs and reject
   timestamps whose UTC canonicalization leaves the supported year range.
 
-[Unreleased]: https://github.com/faustbrian/go-audit/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/faustbrian/go-audit/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/faustbrian/go-audit/releases/tag/v2.0.0
 [1.0.0]: https://github.com/faustbrian/go-audit/releases/tag/v1.0.0

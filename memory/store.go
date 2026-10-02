@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/faustbrian/go-audit"
+	"github.com/faustbrian/go-audit/v2"
 )
 
 // Config declares all process-local capacity limits. Its zero value is

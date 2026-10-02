@@ -525,7 +525,7 @@ func validateInput(id string, recordedAt time.Time, input RecordInput, limits Li
 	if err := boundedOptional("reason_code", input.ReasonCode, limits.MaxFieldBytes); err != nil {
 		return err
 	}
-	if err := boundedOptional("description", input.Description, limits.MaxDescriptionBytes); err != nil {
+	if err := boundedOptional("description", input.Description, min(limits.MaxDescriptionBytes, limits.MaxRecordBytes)); err != nil {
 		return err
 	}
 	if err := validateActor(input.Actor, limits, false); err != nil {
@@ -551,10 +551,10 @@ func validateInput(id string, recordedAt time.Time, input RecordInput, limits Li
 	if states != 1 {
 		return invalid("changes", "must be explicit no-change or structured before/after values")
 	}
-	if err := validateMap("changes", input.Changes.Before, input.Changes.After, limits.MaxChangeEntries, limits.MaxChangeBytes, false); err != nil {
+	if err := validateMap("changes", input.Changes.Before, input.Changes.After, limits.MaxChangeEntries, min(limits.MaxChangeBytes, limits.MaxRecordBytes), false); err != nil {
 		return err
 	}
-	if err := validateMap("attributes", input.Attributes, nil, limits.MaxAttributeEntries, limits.MaxAttributeBytes, true); err != nil {
+	if err := validateMap("attributes", input.Attributes, nil, limits.MaxAttributeEntries, min(limits.MaxAttributeBytes, limits.MaxRecordBytes), true); err != nil {
 		return err
 	}
 	for name, value := range map[string]string{
@@ -671,7 +671,20 @@ func validateMap(name string, first, second map[string]string, maxEntries, maxBy
 	if len(first)+len(second) > maxEntries {
 		return invalid(name, "has too many entries")
 	}
-	total := 0
+	remaining := maxBytes
+	// Bound all text before scanning or allocating normalization buffers.
+	for _, values := range []map[string]string{first, second} {
+		for key, value := range values {
+			if len(key) > remaining {
+				return invalid(name, "exceeds byte limit")
+			}
+			remaining -= len(key)
+			if len(value) > remaining {
+				return invalid(name, "exceeds byte limit")
+			}
+			remaining -= len(value)
+		}
+	}
 	for _, values := range []map[string]string{first, second} {
 		for key, value := range values {
 			if key == "" {
@@ -687,11 +700,7 @@ func validateMap(name string, first, second map[string]string, maxEntries, maxBy
 			if attributes && (strings.HasPrefix(lower, "audit.") || strings.HasPrefix(lower, "integrity.")) {
 				return invalid(name, "uses a reserved namespace")
 			}
-			total = total + len(key) + len(value)
 		}
-	}
-	if total > maxBytes {
-		return invalid(name, "exceeds byte limit")
 	}
 	return nil
 }
@@ -716,11 +725,11 @@ func boundedRequired(name, value string, maximum int) error {
 	return boundedOptional(name, value, maximum)
 }
 func boundedOptional(name, value string, maximum int) error {
-	if !validText(value) {
-		return invalid(name, "must be valid durable text")
-	}
 	if len(value) > maximum {
 		return invalid(name, "exceeds byte limit")
+	}
+	if !validText(value) {
+		return invalid(name, "must be valid durable text")
 	}
 	return nil
 }
