@@ -5,6 +5,13 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-10-02
+
+### Changed
+
+- Refresh test dependencies and shared CI without changing root v2 APIs or
+  runtime behavior.
+
 ## [2.0.0] - 2026-09-30
 
 The root module uses `/v2` imports and bounded integrity operations. The
@@ -127,6 +134,7 @@ local `replace` directives.
 - Preserve cursor round trips for newline-bearing durable record IDs and reject
   timestamps whose UTC canonicalization leaves the supported year range.
 
-[Unreleased]: https://github.com/faustbrian/go-audit/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/faustbrian/go-audit/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/faustbrian/go-audit/releases/tag/v2.0.1
 [2.0.0]: https://github.com/faustbrian/go-audit/releases/tag/v2.0.0
 [1.0.0]: https://github.com/faustbrian/go-audit/releases/tag/v1.0.0

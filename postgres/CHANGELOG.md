@@ -2,7 +2,14 @@
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-02
+
 ### Changed
+
+- Require Go 1.27.0, up from Go 1.26.6 in the previous release. Upgrade
+  application toolchains before adopting this version.
+- Refresh PostgreSQL integration-test helpers and their SSH test dependencies
+  without changing the adapter API, SQL, or migrations.
 
 - Update runtime pgx to v5.11.0. Custom implementations of `pgx.Rows`
   must add `TypeMap`; review upstream connection-string and date/time
@@ -80,5 +87,6 @@
 - Atomic digest-bound evidence for each digest-pinned PostgreSQL 14 through 18
   matrix result.
 
-[Unreleased]: https://github.com/faustbrian/go-audit/compare/postgres%2Fv1.0.0...HEAD
+[Unreleased]: https://github.com/faustbrian/go-audit/compare/postgres%2Fv1.0.1...HEAD
+[1.0.1]: https://github.com/faustbrian/go-audit/releases/tag/postgres%2Fv1.0.1
 [1.0.0]: https://github.com/faustbrian/go-audit/releases/tag/postgres%2Fv1.0.0
