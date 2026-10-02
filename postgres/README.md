@@ -24,7 +24,7 @@ deployment-owned boundaries.
 Add the latest compatible release to an application:
 
 ```sh
-go get github.com/faustbrian/go-audit/postgres@v1.0.0
+go get github.com/faustbrian/go-audit/postgres@v1.0.1
 ```
 
 Applications import the package using its conventional identifier:

@@ -33,7 +33,7 @@ See [migration guidance](COMPATIBILITY.md) before adopting bounded v2 behavior.
 Install only the module an application imports:
 
 ```sh
-go get github.com/faustbrian/go-audit/v2@v2.0.0
+go get github.com/faustbrian/go-audit/v2@v2.0.1
 go get github.com/faustbrian/go-audit/postgres@v1
 ```
 
