@@ -5,6 +5,13 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 ## [Unreleased]
 
+## [2.0.2] - 2026-10-07
+
+### Changed
+
+- Refresh shared CI while retaining the root v2 API, runtime dependencies
+  and tooling bootstrap. The independent PostgreSQL adapter remains on v1.0.1.
+
 ## [2.0.1] - 2026-10-02
 
 ### Changed
@@ -134,7 +141,8 @@ local `replace` directives.
 - Preserve cursor round trips for newline-bearing durable record IDs and reject
   timestamps whose UTC canonicalization leaves the supported year range.
 
-[Unreleased]: https://github.com/faustbrian/go-audit/compare/v2.0.1...HEAD
+[Unreleased]: https://github.com/faustbrian/go-audit/compare/v2.0.2...HEAD
+[2.0.2]: https://github.com/faustbrian/go-audit/releases/tag/v2.0.2
 [2.0.1]: https://github.com/faustbrian/go-audit/releases/tag/v2.0.1
 [2.0.0]: https://github.com/faustbrian/go-audit/releases/tag/v2.0.0
 [1.0.0]: https://github.com/faustbrian/go-audit/releases/tag/v1.0.0
