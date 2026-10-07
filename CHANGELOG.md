@@ -9,8 +9,9 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 ### Changed
 
-- Refresh shared CI while retaining the root v2 API, runtime dependencies
-  and tooling bootstrap. The independent PostgreSQL adapter remains on v1.0.1.
+- Refresh shared CI and pinned tooling to support root-only release
+  rehearsals while retaining the root v2 API and runtime dependencies.
+  The independent PostgreSQL adapter remains on v1.0.1.
 
 ## [2.0.1] - 2026-10-02
 
