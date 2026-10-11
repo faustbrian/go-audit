@@ -37,11 +37,25 @@ The supported PostgreSQL matrix is the upstream-supported majors 14 through 18
 using the digest-pinned current-minor images declared in
 `postgres/testdata/postgres-images.tsv`. The integration-tagged PostgreSQL
 module gate runs against the default pinned 18 image, while the version table
-is validated by `TestPostgreSQLVersionMatrixUsesImmutableImages`. Race and
-`goleak` checks cover all packages. Fuzz, stress, soak, fault, exact statement
+is validated by `TestPostgreSQLVersionMatrixUsesImmutableImages`. The fixtures
+are started by the tagged tests and require Docker despite the manifest's empty
+shared-service list. Race and `goleak` checks cover all packages in full
+qualification. Fuzz, stress, soak, fault, exact statement
 coverage, viable mutation, benchmarks, security, dependency, documentation,
 API, and clean-consumer gates are release requirements rather than optional
 warnings.
+
+For ordinary development, `make check` and `make ci` select the public
+verifier's bounded local route: deterministic tests and fuzz seeds/corpora,
+affected-target active smoke on changed-source CI, offline documentation and
+API checks, the existing false-compliance claim refusal guard, and one focused
+memory lock-wait cancellation race. They still
+respect the PostgreSQL module's `integration` tag and fixture prerequisites.
+`make check-full` preserves the original full campaigns, including 100-count
+duplicate stress, 25-count high-cardinality soak, public root-v1/adapter-v1
+consumers and both module benchmarks. These published consumers do not certify
+a root-v2 PostgreSQL adapter. See [contributing](../CONTRIBUTING.md#verification)
+for isolated module commands and explicit release rehearsal.
 
 Benchmarks measure canonical encoding, redaction, single and atomic batch
 append, fully filtered pagination, streaming export, and chain verification.

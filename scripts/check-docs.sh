@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+local_only=false
+if [[ $# -gt 1 || ( $# -eq 1 && "${1:-}" != --local ) ]]; then
+    printf 'usage: %s [--local]\n' "$0" >&2
+    exit 2
+fi
+if [[ $# -eq 1 ]]; then
+    local_only=true
+fi
+
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 required=(
     README.md CHANGELOG.md COMPATIBILITY.md CONTRIBUTING.md DEPRECATION.md
@@ -34,16 +43,18 @@ done < <(grep -rEo '\[[^]]+\]\([^)]+\)' \
     README.md CHANGELOG.md COMPATIBILITY.md CONTRIBUTING.md SECURITY.md \
     SUPPORT.md docs postgres/README.md postgres/CHANGELOG.md postgres/docs)
 
-for module in . postgres; do
-    (
-        cd "${module}"
-        packages="$(go list ./...)"
-        while IFS= read -r package; do
-            go doc "${package}" >/dev/null
-        done <<< "${packages}"
-        go test ./... -run '^Example' -count=1
-    )
-done
+if [[ "${local_only}" == false ]]; then
+    for module in . postgres; do
+        (
+            cd "${module}"
+            packages="$(go list ./...)"
+            while IFS= read -r package; do
+                go doc "${package}" >/dev/null
+            done <<< "${packages}"
+            go test ./... -run '^Example' -count=1
+        )
+    done
+fi
 
 source_list="$(mktemp)"
 trap 'rm -f "${source_list}"' EXIT

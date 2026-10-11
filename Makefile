@@ -1,8 +1,14 @@
 GOLIB ?= golib
 
-.PHONY: check ci cohesion inventory repository-check
+.PHONY: check check-full ci cohesion docs-local inventory repository-check
 
-check:
+check: docs-local
+	$(GOLIB) check --local --all
+
+docs-local:
+	bash scripts/check-docs.sh --local
+
+check-full:
 	$(GOLIB) check --all
 
 ci: repository-check cohesion check

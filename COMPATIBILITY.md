@@ -25,8 +25,8 @@ privacy validation, even when the same input also contains a prohibited key.
 The PostgreSQL adapter remains a root-v1 consumer and cannot receive root-v2
 record values without a separately reviewed adapter migration.
 
-The modules require Go 1.27.0, and repository verification currently tests
-exactly Go 1.27.0. The PostgreSQL adapter supports PostgreSQL 14 through 18
+The modules require Go 1.27.0, and repository verification declares
+Go 1.27.2 as its producer. The PostgreSQL adapter supports PostgreSQL 14 through 18
 according to the digest-pinned matrix in
 `postgres/testdata/postgres-images.tsv`.
 

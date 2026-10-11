@@ -15,9 +15,9 @@ tags. Its canonical module path is
 `github.com/faustbrian/go-audit/postgres`.
 
 The minimum supported Go version is **Go 1.27.0**, matching this module's
-`go.mod` and the repository support policy. Repository verification currently
-tests Go 1.27.0; other toolchain versions are not part of the recorded support
-claim. The adapter supports PostgreSQL 14 through 18. See
+`go.mod` and the repository support policy. Repository verification declares
+Go 1.27.2 as its producer; the minimum is unchanged. The adapter supports
+PostgreSQL 14 through 18. See
 [compatibility and assurance](../docs/assurance.md) for the exact evidence and
 deployment-owned boundaries.
 
@@ -224,8 +224,8 @@ for integration evidence.
 - [Security reporting](../SECURITY.md)
 - [License](LICENSE)
 
-The versioned [Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md)
+The versioned [Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v2.1.1/docs/ecosystem/README.md)
 explains how independently released modules compose. The
-[persistence and durability family guidance](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/design-language.md#package-families-and-selection)
+[persistence and durability family guidance](https://github.com/faustbrian/go-library-tools/blob/v2.1.1/docs/ecosystem/design-language.md#package-families-and-selection)
 places this adapter alongside its storage, migration, idempotency, and outbox
 companions without introducing a framework or umbrella dependency.

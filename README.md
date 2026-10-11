@@ -3,7 +3,7 @@
 [![CI](https://github.com/faustbrian/go-audit/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/faustbrian/go-audit/actions/workflows/ci.yml)
 [![CodeQL](https://img.shields.io/badge/CodeQL-required-blue)](https://github.com/faustbrian/go-audit/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-100%25_required-blue)](CONTRIBUTING.md#verification)
-[![Mutation](https://img.shields.io/badge/mutation-100%25_required-blue)](CONTRIBUTING.md#verification)
+[![Mutation](https://img.shields.io/badge/mutation-local%20%2F%20scheduled-blue)](CONTRIBUTING.md#verification)
 [![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
 [![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-audit/v2.svg)](https://pkg.go.dev/github.com/faustbrian/go-audit/v2)
 [![Release](https://img.shields.io/github/v/release/faustbrian/go-audit?sort=semver)](https://github.com/faustbrian/go-audit/releases)
@@ -21,7 +21,7 @@ establish legal or regulatory compliance.
 
 The root library's v2 line and the separately released PostgreSQL adapter's v1
 line are stable. Their minimum supported Go version is 1.27.0; repository
-verification currently tests exactly Go 1.27.0.
+verification declares Go 1.27.2 as its producer.
 
 The published root module is `github.com/faustbrian/go-audit/v2`.
 Do not use local `replace` directives to consume this checkout as v1. The
@@ -100,9 +100,18 @@ and [PostgreSQL operations](docs/postgresql.md). The
 [compiler-checked examples](examples_test.go) demonstrate builder, recorder,
 integrity-chain, and export use.
 
-The versioned [Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md)
-and [package-family selection guidance](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/design-language.md#package-families-and-selection)
+The versioned [Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v2.1.1/docs/ecosystem/README.md)
+and [package-family selection guidance](https://github.com/faustbrian/go-library-tools/blob/v2.1.1/docs/ecosystem/design-language.md#package-families-and-selection)
 describe the shared design language, related packages, and composition rules.
+
+## Development
+
+Start with standalone `GOWORK=off go test ./...`. The bounded `make check` and
+`make ci` routes consume the public verifier; `make check-full` retains explicit
+full qualification. The tagged PostgreSQL adapter uses Docker-backed fixtures
+even though its manifest declares no shared services. See
+[contributor guidance](CONTRIBUTING.md#verification) for module boundaries,
+focused active fuzzing, optional local mutation and release prerequisites.
 
 ## License
 
