@@ -100,8 +100,8 @@ and [PostgreSQL operations](docs/postgresql.md). The
 [compiler-checked examples](examples_test.go) demonstrate builder, recorder,
 integrity-chain, and export use.
 
-The versioned [Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v2.1.1/docs/ecosystem/README.md)
-and [package-family selection guidance](https://github.com/faustbrian/go-library-tools/blob/v2.1.1/docs/ecosystem/design-language.md#package-families-and-selection)
+The versioned [Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v2.1.3/docs/ecosystem/README.md)
+and [package-family selection guidance](https://github.com/faustbrian/go-library-tools/blob/v2.1.3/docs/ecosystem/design-language.md#package-families-and-selection)
 describe the shared design language, related packages, and composition rules.
 
 ## Development
