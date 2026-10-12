@@ -4,6 +4,7 @@
 - [Compiler-checked examples](../examples_test.go)
 - [Go package reference](https://pkg.go.dev/github.com/faustbrian/go-audit/v2)
 - [API and record semantics](api.md)
+- [Source documentation audit](source-documentation-audit.md)
 - [Adoption patterns and examples](adoption.md)
 - [Delivery and failure modes](delivery.md)
 - [Threat model and compliance boundary](threat-model.md)

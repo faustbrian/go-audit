@@ -39,8 +39,9 @@ const (
 	AppendCommitted
 )
 
-// AppendError preserves an inspectable cause while its own safe text discloses
-// only the persistence outcome.
+// AppendError permits errors.Is classification of a retained cause while its own
+// safe text discloses only the persistence outcome. It intentionally has no Unwrap
+// method, so callers cannot retrieve dependency diagnostics with errors.Unwrap/As.
 type AppendError struct {
 	outcome AppendOutcome
 	cause   error
@@ -87,7 +88,8 @@ func (failure *AppendError) AppendOutcome() AppendOutcome { return failure.outco
 type appendOutcomeError interface{ AppendOutcome() AppendOutcome }
 
 // AppendOutcomeOf extracts a failure's durability classification.
-// Unclassified failures are conservatively unknown.
+// Unclassified failures and panicking classifiers are conservatively unknown.
+// A nil error also returns AppendUnknown; it is not a success classification.
 func AppendOutcomeOf(err error) (outcome AppendOutcome) {
 	defer func() {
 		if recover() != nil {
@@ -113,13 +115,18 @@ const (
 
 // AppendResult is the result for one submitted record.
 type AppendResult struct {
+	// RecordID must identify the submitted record, including an identical duplicate.
 	RecordID string
-	Status   AppendStatus
+	// Status distinguishes newly accepted from byte-identical duplicate content.
+	Status AppendStatus
 }
 
 // BatchResult preserves deterministic input-order results. Implementations
 // must document whether a returned error can accompany committed members.
 type BatchResult struct {
+	// Results contains one acknowledgement per input member in input order.
+	// Its slice is caller-visible; a result accompanying an error requires outcome
+	// reconciliation.
 	Results []AppendResult
 }
 
@@ -127,6 +134,12 @@ type BatchResult struct {
 // cancellation, bound batches, make record IDs idempotent, and classify every
 // error as rejected, committed, or unknown.
 type Sink interface {
+	// Append submits one explicitly redacted record with an idempotent stable ID.
+	// An error must classify the persistence outcome; success returns a matching
+	// ID/status.
 	Append(context.Context, Record) (AppendResult, error)
+	// AppendBatch submits a bounded nonempty batch in input order. Implementations
+	// document atomicity and partial commits; the slice must not be mutated during the
+	// call.
 	AppendBatch(context.Context, []Record) (BatchResult, error)
 }

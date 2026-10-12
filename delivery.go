@@ -36,10 +36,16 @@ const (
 )
 
 // DeliveryAlert contains bounded, identifier-free failure metadata.
-type DeliveryAlert struct{ Outcome AppendOutcome }
+type DeliveryAlert struct {
+	// Outcome is the primary append's persistence classification, not a cause or record
+	// identifier.
+	Outcome AppendOutcome
+}
 
 // Alerter must durably or operationally surface fail-open delivery loss.
 type Alerter interface {
+	// Alert reports possible delivery loss using a recovery context. Nil means
+	// the caller-owned alert boundary succeeded, not that the record was persisted.
 	Alert(context.Context, DeliveryAlert) error
 }
 
@@ -57,8 +63,12 @@ func (alert AlertFunc) Alert(ctx context.Context, value DeliveryAlert) error {
 // BufferLimits declares the finite capacity of a caller-owned durable buffer.
 // MaxBytes includes the complete persisted representation and adapter overhead.
 type BufferLimits struct {
-	MaxRecords      int
-	MaxBytes        int
+	// MaxRecords is the declared positive total record capacity.
+	MaxRecords int
+	// MaxBytes is the declared positive persisted-byte capacity, including adapter
+	// overhead.
+	MaxBytes int
+	// MaxBatchRecords is positive, no greater than MaxRecords or MaxAppendBatchRecords.
 	MaxBatchRecords int
 }
 
@@ -73,34 +83,59 @@ func (limits BufferLimits) valid() bool {
 // The caller remains responsible for selecting and operating the adapter.
 type DurableBuffer interface {
 	Sink
+	// BufferLimits reports finite capacity before recording starts; reporting
+	// valid bounds alone does not establish the implementation's durability.
 	BufferLimits() BufferLimits
 }
 
 // RecorderConfig wires an explicit delivery policy. Sink, Redactor, and Mode
 // are always required; fail-open requires Alerter and buffering requires Buffer.
 type RecorderConfig struct {
-	Sink            Sink
-	Redactor        Redactor
-	Mode            DeliveryMode
-	Alerter         Alerter
-	Buffer          DurableBuffer
-	Observer        Observer
-	Clock           func() time.Time
-	DelayThreshold  time.Duration
+	// Sink is the required primary persistence collaborator.
+	Sink Sink
+	// Redactor is the required caller-owned privacy policy run before persistence.
+	Redactor Redactor
+	// Mode is required; its zero value is invalid.
+	Mode DeliveryMode
+	// Alerter is required only for DeliveryFailOpenWithAlert.
+	Alerter Alerter
+	// Buffer is required only for DeliveryDurableBuffer and must declare valid finite
+	// limits.
+	Buffer DurableBuffer
+	// Observer optionally receives synchronous identifier-free outcomes; panics are
+	// contained.
+	Observer Observer
+	// Clock optionally supplies delay-observation time; nil uses time.Now.
+	// It has no context, and a contained panic suppresses only the delay observation.
+	Clock func() time.Time
+	// DelayThreshold enables delayed-record observations when positive; zero disables
+	// them.
+	DelayThreshold time.Duration
+	// RecoveryTimeout is required and positive for alert/buffer modes, at most
+	// MaxRecoveryTimeout.
+	// Recovery retains context values but detaches the primary cancellation and deadline.
 	RecoveryTimeout time.Duration
 }
 
 // DeliveryResult reports whether the redacted record persisted, was buffered,
 // or was explicitly allowed to proceed after an alert.
 type DeliveryResult struct {
+	// Disposition identifies primary persistence, fallback buffering or explicit fail-open
+	// handling.
 	Disposition DeliveryDisposition
-	Append      AppendResult
+	// Append is the primary or buffer acknowledgement where supplied; an accompanying
+	// error still requires inspection even when Disposition is DeliveryPersisted.
+	Append AppendResult
 }
 
-// DeliveryBatchResult is the policy result for one bounded atomic batch.
+// DeliveryBatchResult is the policy result for one bounded batch; atomicity
+// remains part of the selected sink contract.
 type DeliveryBatchResult struct {
+	// Disposition identifies the policy result for the batch as a unit.
 	Disposition DeliveryDisposition
-	Append      BatchResult
+	// Append contains primary or buffer member acknowledgements where supplied;
+	// Disposition alone does not remove the need to inspect an accompanying error.
+	Append BatchResult
 }
 
 // Recorder applies redaction before any sink or delivery-failure handling. It
@@ -131,7 +166,9 @@ func safeRedactionFailure(err error) (result error) {
 }
 
 var (
+	// ErrDeliveryAlertFailed classifies failure of the caller-owned fail-open alert.
 	ErrDeliveryAlertFailed = errors.New("audit: delivery alert failed")
+	// ErrDurableBufferFailed classifies failure of the caller-owned fallback buffer.
 	ErrDurableBufferFailed = errors.New("audit: durable buffer failed")
 	errDependencyPanic     = errors.New("audit: dependency panicked")
 )
@@ -187,7 +224,11 @@ func callBufferLimits(buffer DurableBuffer) (limits BufferLimits, ok bool) {
 }
 
 // Submit redacts one record, invokes the configured sink once, and applies the
-// selected failure policy. Its result never implies an unreported discard.
+// selected failure policy. A confirmed-commit error returns DeliveryPersisted
+// with an error and the sink's result without validating that acknowledgement;
+// it never enters fallback. Ordinary nil-error acknowledgements are validated.
+// Redactor, sink and alert panics are contained, but synchronous dependencies
+// cannot be preempted if they ignore their context. No action is implicitly retried.
 func (recorder *Recorder) Submit(ctx context.Context, record Record) (DeliveryResult, error) {
 	if recorder == nil || ctx == nil || record.ID() == "" {
 		return DeliveryResult{}, invalid("recorder", "must be assigned")
@@ -249,7 +290,10 @@ func (recorder *Recorder) Submit(ctx context.Context, record Record) (DeliveryRe
 
 // SubmitBatch redacts every member before invoking the primary sink. Delivery
 // policy is applied to the batch as one unit; compatible sinks therefore
-// preserve their documented atomic batch semantics.
+// preserve their documented atomic batch semantics. Core does not make a
+// partially committing custom sink atomic. Nil-error acknowledgements must match
+// member IDs/statuses in input order; confirmed-commit errors bypass fallback and
+// return the sink result with an error. Caller slices must stay unchanged during use.
 func (recorder *Recorder) SubmitBatch(ctx context.Context, records []Record) (DeliveryBatchResult, error) {
 	if recorder == nil || ctx == nil {
 		return DeliveryBatchResult{}, invalid("recorder", "must be assigned")

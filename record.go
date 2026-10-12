@@ -1,6 +1,18 @@
 // Package audit provides immutable-by-contract records for security-relevant
 // and business-relevant actions. It is not a logging, tracing, metrics,
 // authorization, event-sourcing, or domain-event framework.
+//
+// Build records with Builder or restore schema-v1 bytes with ParseCanonicalJSON.
+// Apply caller-owned redaction before persistence and before integrity sealing.
+// Recorder selects explicit failure handling without retries or background work.
+// Tenant selections are not authorization, and recorded identities are assertions
+// supplied by the application rather than authenticated facts.
+//
+// Record collections and digests are copied. Concurrent use of Builder, Recorder
+// and Chain also requires their synchronous dependencies to support it. Callers
+// own deadlines, storage, keys, checkpoints, archives and retention policy.
+// The memory package is process-local; the independently versioned postgres
+// module consumes root-v1 types and cannot store this module's v2 records.
 package audit
 
 import (
@@ -108,14 +120,22 @@ const (
 
 // Limits bounds every caller-controlled collection and variable-length field.
 type Limits struct {
-	MaxRecordBytes      int
-	MaxFieldBytes       int
+	// MaxRecordBytes caps the entire canonical JSON representation, at most 1 MiB.
+	MaxRecordBytes int
+	// MaxFieldBytes caps each identity/context string, at most 1 KiB.
+	MaxFieldBytes int
+	// MaxDescriptionBytes caps the optional description; the record ceiling also applies.
 	MaxDescriptionBytes int
+	// MaxAttributeEntries caps the number of attribute keys.
 	MaxAttributeEntries int
-	MaxAttributeBytes   int
-	MaxChangeEntries    int
-	MaxChangeBytes      int
-	MaxIntegrityBytes   int
+	// MaxAttributeBytes caps combined attribute key/value bytes before encoding.
+	MaxAttributeBytes int
+	// MaxChangeEntries caps entries across Before and After, counting both maps.
+	MaxChangeEntries int
+	// MaxChangeBytes caps combined change key/value bytes before encoding.
+	MaxChangeBytes int
+	// MaxIntegrityBytes must be 32 for the supported SHA-256 digests.
+	MaxIntegrityBytes int
 }
 
 // DefaultLimits returns conservative limits suitable for online recording.
@@ -132,7 +152,9 @@ func DefaultLimits() Limits {
 	}
 }
 
-// Validate reports whether every configured limit is positive and coherent.
+// Validate checks positive limits, the exact digest length and record/field
+// ceilings. It does not substitute defaults for a zero value; collection and
+// description byte budgets are additionally capped by MaxRecordBytes during Build.
 func (limits Limits) Validate() error {
 	ceiling := DefaultLimits()
 	if limits.MaxRecordBytes <= 0 || limits.MaxFieldBytes <= 0 ||
@@ -147,12 +169,16 @@ func (limits Limits) Validate() error {
 
 // ActorInput supplies actor identity to a new record.
 type ActorInput struct {
+	// Kind is required and distinguishes identified, anonymous and unknown actors.
 	Kind ActorKind
-	ID   string
+	// ID is required for human, service and system actors; otherwise it must be empty.
+	ID string
 	// AuthenticationMethod is empty or one of the exported
 	// AuthenticationMethod constants. It records a mechanism, never a credential.
 	AuthenticationMethod string
-	DelegatedBy          *ActorInput
+	// DelegatedBy optionally identifies one immediate delegator; nested delegation is
+	// invalid.
+	DelegatedBy *ActorInput
 }
 
 // Actor is an immutable actor identity. A zero Actor represents no delegated
@@ -185,8 +211,11 @@ func (actor Actor) DelegatedBy() Actor {
 // SubjectInput supplies the stable identity of an audited resource. Deleted
 // identities retain their stable ID; Deleted describes lifecycle state only.
 type SubjectInput struct {
-	Type    string
-	ID      string
+	// Type is the required application-defined resource type.
+	Type string
+	// ID is the required stable resource identity, including after deletion.
+	ID string
+	// Deleted records a lifecycle assertion; it does not remove the identity.
 	Deleted bool
 }
 
@@ -209,8 +238,14 @@ func (subject Subject) Deleted() bool { return subject.deleted }
 // mean the value was absent; callers use explicit "unknown" values only when
 // policy requires distinguishing unknown from absent.
 type ContextInput struct {
+	// TenantID, CorrelationID, CausationID, RequestID, TraceID and IdempotencyID
+	// are optional stable scope/link identifiers; none authenticates or deduplicates an
+	// action.
 	TenantID, CorrelationID, CausationID, RequestID, TraceID, IdempotencyID string
-	SourceService, SourceVersion, Environment, NetworkOrigin, UserAgent     string
+	// SourceService, SourceVersion and Environment describe deployment context.
+	// NetworkOrigin and UserAgent are retained only when caller privacy policy permits
+	// them.
+	SourceService, SourceVersion, Environment, NetworkOrigin, UserAgent string
 }
 
 // RecordContext is immutable contextual metadata.
@@ -252,14 +287,21 @@ func (value RecordContext) NetworkOrigin() string { return value.networkOrigin }
 // UserAgent returns the optional policy-permitted user agent.
 func (value RecordContext) UserAgent() string { return value.userAgent }
 
-// ChangeSetInput supplies either structured before/after values or an explicit
-// NoChange state. Values are safe bounded strings, not arbitrary request or
-// response bodies.
+// ChangeSetInput supplies exactly one of structured before/after values, explicit
+// NoChange, or explicit Redacted state. Values are safe bounded strings, not
+// arbitrary request or response bodies.
 type ChangeSetInput struct {
+	// NoChange explicitly asserts no structured change and excludes Redacted and nonempty
+	// maps.
 	NoChange bool
+	// Redacted asserts changes existed but all fields were removed; it excludes NoChange
+	// and nonempty maps.
 	Redacted bool
-	Before   map[string]string
-	After    map[string]string
+	// Before contains safe pre-action fields; Build copies it and validates keys and byte
+	// bounds.
+	Before map[string]string
+	// After contains safe post-action fields; entries and bytes share the Before budget.
+	After map[string]string
 }
 
 // ChangeSet is an immutable structured change description.
@@ -283,14 +325,25 @@ func (changes ChangeSet) After() map[string]string { return cloneMap(changes.aft
 
 // PolicyMetadata identifies the caller-owned audit and redaction policy used
 // to construct a record.
-type PolicyMetadata struct{ PolicyID, Version string }
+type PolicyMetadata struct {
+	// PolicyID and Version optionally label the application-owned policy; they
+	// do not prove that policy was enforced or that redaction has occurred.
+	PolicyID, Version string
+}
 
 // IntegrityInput carries optional chain metadata. Digest bytes are defensively
-// copied; a zero Sequence with empty digests means integrity is disabled.
+// copied; all-zero fields mean integrity is disabled. Nonzero metadata requires
+// coherent algorithm, partition, sequence, key ID and digest fields.
 type IntegrityInput struct {
-	Algorithm              IntegrityAlgorithm
-	Partition, KeyID       string
-	Sequence               uint64
+	// Algorithm selects the supported digest construction when integrity is enabled.
+	Algorithm IntegrityAlgorithm
+	// Partition scopes chain ordering. KeyID is required only for HMAC and selects
+	// historical key material.
+	Partition, KeyID string
+	// Sequence is the caller-allocated positive partition position; one begins a chain.
+	Sequence uint64
+	// PreviousDigest is empty at sequence one and otherwise 32 bytes. Digest is 32 bytes.
+	// Both are copied; construction validates metadata shape, not the digest computation.
 	PreviousDigest, Digest []byte
 }
 
@@ -327,16 +380,33 @@ func (value Integrity) Enabled() bool {
 
 // RecordInput contains the caller-owned values used to construct one record.
 type RecordInput struct {
-	OccurredAt                      time.Time
+	// OccurredAt is the required action time, normalized to UTC microseconds without
+	// monotonic data.
+	OccurredAt time.Time
+	// Action is required; ReasonCode and Description are optional machine and human
+	// summaries.
+	// All are application assertions, and Description must be privacy-safe.
 	Action, ReasonCode, Description string
-	Outcome                         Outcome
-	Actor                           ActorInput
-	Subject                         SubjectInput
-	Context                         ContextInput
-	Changes                         ChangeSetInput
-	Policy                          PolicyMetadata
-	Attributes                      map[string]string
-	Integrity                       IntegrityInput
+	// Outcome is required, including an explicit OutcomeUnknown when the result is
+	// unknown.
+	Outcome Outcome
+	// Actor supplies required identity semantics and optional immediate delegation.
+	Actor ActorInput
+	// Subject supplies the required resource type and stable ID.
+	Subject SubjectInput
+	// Context supplies optional links and deployment metadata, not authorization.
+	Context ContextInput
+	// Changes must select exactly one state: NoChange, Redacted, or nonempty structured
+	// maps.
+	Changes ChangeSetInput
+	// Policy identifies caller policy without executing or authenticating that policy.
+	Policy PolicyMetadata
+	// Attributes contains copied extensible fields; reserved audit./integrity. and
+	// secret-bearing keys are rejected.
+	Attributes map[string]string
+	// Integrity optionally supplies copied chain metadata; use Chain to compute or verify
+	// digests.
+	Integrity IntegrityInput
 }
 
 // Record is immutable by contract. All mutable inputs and returned values are
@@ -356,7 +426,8 @@ type Record struct {
 	redactionApplied                bool
 }
 
-// ID returns the globally unique stable record identifier.
+// ID returns the stable record identifier. Default generation is random;
+// uniqueness of an injected identifier remains the caller's responsibility.
 func (record Record) ID() string { return record.id }
 
 // OccurredAt returns when the audited action occurred in canonical UTC.
@@ -408,9 +479,16 @@ func (record Record) Integrity() Integrity {
 
 // BuilderConfig supplies bounded construction dependencies.
 type BuilderConfig struct {
-	Clock       func() time.Time
+	// Clock supplies recording time; nil uses time.Now. It must be bounded and support
+	// intended concurrency.
+	Clock func() time.Time
+	// IDGenerator supplies a bounded nonempty stable ID; nil uses crypto/rand
+	// UUID-v4-shaped IDs.
+	// The caller must ensure injected IDs are unique. Failures and panics become
+	// ErrRecordIDUnavailable.
 	IDGenerator func() (string, error)
-	Limits      Limits
+	// Limits selects validation bounds; an entirely zero value uses DefaultLimits.
+	Limits Limits
 }
 
 // Builder constructs immutable validated records.
@@ -420,7 +498,9 @@ type Builder struct {
 	limits      Limits
 }
 
-// NewBuilder constructs a record builder. Nil functions use secure defaults.
+// NewBuilder constructs a record builder with validated limits. Nil dependencies
+// use time.Now and crypto/rand UUID-v4-shaped IDs. It starts no goroutines and
+// performs no I/O until Build invokes the configured dependencies.
 func NewBuilder(config BuilderConfig) (*Builder, error) {
 	limits := config.Limits
 	if limits == (Limits{}) {
@@ -440,8 +520,10 @@ func NewBuilder(config BuilderConfig) (*Builder, error) {
 	return &Builder{clock: clock, idGenerator: idGenerator, limits: limits}, nil
 }
 
-// Build validates input, generates a globally random record identity, and
-// defensively owns every mutable value.
+// Build obtains an ID and recording time before validating input, then owns all
+// mutable fields. ID randomness applies only to the default generator; uniqueness
+// is not checked here. Dependency failures have opaque public classifications.
+// A zero Record is returned on failure. Inputs must not be mutated during Build.
 func (builder *Builder) Build(input RecordInput) (Record, error) {
 	if builder == nil {
 		return Record{}, invalid("builder", "must be assigned")

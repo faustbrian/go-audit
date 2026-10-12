@@ -1,5 +1,9 @@
 // Package memory provides a bounded process-local audit sink for tests and
 // development. It is not durable and must not be used as a compliance store.
+// It implements the root-v2 Sink, Reader and Exporter contracts, not DurableBuffer.
+// Explicit redaction is required before append. Stable snapshot cursors select
+// accepted records but convey no read authorization or persistent identity.
+// No eviction, background worker, retention operation or shutdown is provided.
 package memory
 
 import (
@@ -16,8 +20,14 @@ import (
 // Config declares all process-local capacity limits. Its zero value is
 // invalid so tests cannot accidentally create an unbounded store.
 type Config struct {
-	MaxRecords      int
-	MaxBytes        int
+	// MaxRecords is the positive number of distinct IDs that may be retained; no eviction
+	// occurs.
+	MaxRecords int
+	// MaxBytes caps retained canonical payload bytes, not map/slice or runtime heap
+	// overhead.
+	MaxBytes int
+	// MaxBatchRecords is a positive per-call limit, at most audit.MaxAppendBatchRecords.
+	// It need not equal total capacity; new IDs are also checked against MaxRecords.
 	MaxBatchRecords int
 }
 
@@ -63,7 +73,10 @@ func New(config Config) (*Store, error) {
 }
 
 // Query returns records ordered by recording time then record ID. The cursor
-// is exclusive and stable across insertion order.
+// is exclusive and stable across insertion order. A fresh page captures an
+// acceptance watermark; its continuation excludes later accepted records,
+// including backdated ones. It builds a snapshot of the bounded store before
+// filtering and returns a caller-owned page slice. Selection is not authorization.
 func (store *Store) Query(ctx context.Context, query audit.Query) (audit.Page, error) {
 	if store == nil || ctx == nil || !query.Valid() {
 		return audit.Page{}, fmt.Errorf("%w: invalid memory query", audit.ErrInvalidArgument)
@@ -137,7 +150,10 @@ func pageFromMatches(matched []audit.Record, limit int, snapshot uint64) (audit.
 }
 
 // Export invokes consume outside the store gate for at most Query.Limit
-// records in stable query order.
+// records in stable query order. It materializes one page, not the entire export
+// history. Earlier consumer side effects remain on error. Consumer panics and
+// ordinary errors become audit.ErrExportConsumerFailed; cancellation/deadline
+// classifications are preserved. The consumer remains synchronous.
 func (store *Store) Export(ctx context.Context, query audit.Query, consume func(audit.Record) error) error {
 	if consume == nil {
 		return fmt.Errorf("%w: export callback", audit.ErrInvalidArgument)
@@ -223,7 +239,11 @@ func (store *Store) Append(ctx context.Context, record audit.Record) (audit.Appe
 }
 
 // AppendBatch validates and commits the entire batch atomically in input
-// order. A returned error means no member of that call was added.
+// order. A returned error means no member of that call was added. Duplicate IDs
+// with identical canonical bytes consume no additional record or byte capacity;
+// conflicting content rejects the batch. Explicit process-local redaction is
+// required for every member. Cancellation is checked before preparation and
+// after context-aware gate acquisition, not by preempting all encoding work.
 func (store *Store) AppendBatch(ctx context.Context, records []audit.Record) (audit.BatchResult, error) {
 	if store == nil {
 		return audit.BatchResult{}, audit.NewAppendError(audit.AppendRejected, audit.ErrInvalidArgument)

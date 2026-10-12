@@ -5,6 +5,12 @@ Keep a Changelog, and releases follow Semantic Versioning.
 
 ## [Unreleased]
 
+### Documentation
+
+- Clarify default versus injected record identities, canonical parsing and
+  redaction state, delivery acknowledgement exceptions, synchronous ownership,
+  and independently trusted integrity/archive boundaries in source contracts.
+
 ## [2.0.2] - 2026-10-07
 
 ### Changed

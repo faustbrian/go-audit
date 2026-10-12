@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Documentation
+
+- Clarify root-v1 adapter compatibility, caller resource ownership, staging and
+  rollback exceptions, streaming connection lifetime, privilege generation and
+  archive-before-delete responsibilities in source contracts.
+
 ## [1.0.1] - 2026-10-02
 
 ### Changed

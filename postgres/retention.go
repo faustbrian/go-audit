@@ -26,7 +26,8 @@ type RetentionAdmin struct {
 var _ audit.RetentionStore = (*RetentionAdmin)(nil)
 
 // NewRetentionAdmin constructs the separately privileged retention adapter.
-// The supplied pool remains caller-owned.
+// The supplied pool remains caller-owned. Construction does not inspect or grant
+// privileges and does not prove that a deployment has separated credentials.
 func NewRetentionAdmin(pool *pgxpool.Pool, config Config) (*RetentionAdmin, error) {
 	store, err := New(pool, config)
 	if err != nil {
@@ -36,7 +37,9 @@ func NewRetentionAdmin(pool *pgxpool.Pool, config Config) (*RetentionAdmin, erro
 }
 
 // AppendRetentionEvent atomically appends one idempotent hold or release event.
-// A commit failure is classified as unknown.
+// A commit failure is classified as unknown. The result RecordID identifies
+// the retention event. Hold precedence uses database acceptance order, not the
+// event occurrence time; event ID reuse with different content is rejected.
 func (admin *RetentionAdmin) AppendRetentionEvent(ctx context.Context, event audit.RetentionEvent) (audit.AppendResult, error) {
 	if admin == nil || admin.pool == nil || ctx == nil || event.ID() == "" {
 		return audit.AppendResult{}, audit.NewAppendError(audit.AppendRejected, audit.ErrInvalidArgument)
@@ -88,7 +91,9 @@ func (admin *RetentionAdmin) AppendRetentionEvent(ctx context.Context, event aud
 }
 
 // PlanRetention returns bounded, stable, digest-bound candidates that are not
-// held at query time. Callers must archive and verify them before application.
+// held at query time, selected by recording-time/ID order and returned sorted by
+// record ID for later lock ordering. Callers must archive and independently verify
+// the complete plan before application; this method never writes an archive.
 func (admin *RetentionAdmin) PlanRetention(ctx context.Context, request audit.RetentionRequest) (audit.RetentionPlan, error) {
 	if admin == nil || admin.pool == nil || ctx == nil || !request.Valid() {
 		return audit.RetentionPlan{}, fmt.Errorf("%w: retention plan", audit.ErrInvalidArgument)
@@ -145,7 +150,11 @@ func (admin *RetentionAdmin) PlanRetention(ctx context.Context, request audit.Re
 }
 
 // ApplyRetention reconciles and prunes an unchanged plan under per-record
-// advisory locking. It never rewrites historical audit or retention records.
+// advisory locking in one transaction. It does not check archive custody, the
+// original cutoff or tenant authorization: that handoff is caller-owned. Pruning
+// removes content but preserves identity tombstones and retention history.
+// Deleted/Held/Changed counts are confirmed only after commit; commit failure
+// returns an unknown outcome and requires reconciliation. Empty plans do no I/O.
 func (admin *RetentionAdmin) ApplyRetention(ctx context.Context, plan audit.RetentionPlan) (audit.RetentionApplyResult, error) {
 	if admin == nil || admin.pool == nil || ctx == nil {
 		return audit.RetentionApplyResult{}, fmt.Errorf("%w: retention apply", audit.ErrInvalidArgument)

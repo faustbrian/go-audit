@@ -31,23 +31,30 @@ const (
 // Observation deliberately contains no actor, subject, tenant, record, or
 // other caller-controlled label.
 type Observation struct {
-	Kind     ObservationKind
-	Count    int
+	// Kind identifies the fixed operation outcome, not an application-defined label.
+	Kind ObservationKind
+	// Count is the number of records or failures reported for this observation.
+	Count int
+	// Duration is the observed recording delay when Kind is ObservationDelayed.
 	Duration time.Duration
-	Outcome  AppendOutcome
+	// Outcome is the persistence classification where applicable; zero is unknown.
+	Outcome AppendOutcome
 }
 
 // Observer is a dependency-neutral metrics and tracing hook. It runs
 // synchronously without library locks; callers must keep it concurrency-safe,
 // non-blocking, and responsive to context cancellation.
 type Observer interface {
+	// Observe consumes bounded identifier-free metadata synchronously. Library
+	// recording/export paths contain hook panics, but cannot preempt a blocking observer.
 	Observe(context.Context, Observation)
 }
 
 // ObserverFunc adapts a function to Observer.
 type ObserverFunc func(context.Context, Observation)
 
-// Observe invokes the adapted identifier-free observation hook.
+// Observe invokes the adapted hook, or does nothing for a nil function.
+// Direct calls do not contain hook panics; library operation paths do.
 func (observer ObserverFunc) Observe(ctx context.Context, value Observation) {
 	if observer != nil {
 		observer(ctx, value)
@@ -67,7 +74,10 @@ type observedExporter struct {
 	observer Observer
 }
 
-// NewObservedExporter decorates an exporter with identifier-free counts.
+// NewObservedExporter decorates an exporter with identifier-free counts of
+// successfully consumed records, including the prefix before failure. Exporter
+// and consumer panics/errors are mapped to safe public classifications; callbacks
+// remain synchronous. It does not add authorization, deadlines or query validation.
 func NewObservedExporter(exporter Exporter, observer Observer) (Exporter, error) {
 	if exporter == nil || observer == nil {
 		return nil, invalid("observed_exporter", "requires exporter and observer")

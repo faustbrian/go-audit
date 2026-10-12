@@ -11,15 +11,22 @@ import (
 
 // RoleNames identifies deployment-owned PostgreSQL roles. Names must be
 // unique to the deployment or database; the adapter never creates cluster-wide
-// roles or chooses memberships.
+// roles or chooses memberships. The historical fresh-install preflight and
+// embedded migration 1 separately reserve fixed roles that must remain inert.
 type RoleNames struct {
-	Writer    string
-	Reader    string
+	// Writer names the role granted append-function execution but no table reads.
+	Writer string
+	// Reader names the role granted audit-record and retention-history reads.
+	Reader string
+	// Retention names the separately privileged planning, hold-event and prune role.
 	Retention string
 }
 
 // PrivilegeSQL returns least-privilege grants for deployment-owned roles.
 // Apply it with the migration owner after creating and auditing the roles.
+// Names must be distinct valid UTF-8 without NUL, at most 63 bytes, and not the
+// reserved fixed names. Identifiers are quoted, but SQL is only returned, never
+// executed; existing grants, ownership and role memberships are not audited or revoked.
 func PrivilegeSQL(roles RoleNames) (string, error) {
 	values := []string{roles.Writer, roles.Reader, roles.Retention}
 	reserved := map[string]struct{}{"audit_writer": {}, "audit_reader": {}, "audit_retention": {}}

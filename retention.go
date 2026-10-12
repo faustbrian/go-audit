@@ -21,9 +21,14 @@ const (
 
 // RetentionEventInput supplies one immutable legal-hold lifecycle event.
 type RetentionEventInput struct {
+	// ID is the stable event identity, RecordID the target record, and ReasonCode
+	// the caller-owned decision rationale. All three are required bounded text.
 	ID, RecordID, ReasonCode string
-	Kind                     RetentionEventKind
-	OccurredAt               time.Time
+	// Kind must explicitly hold or release the record.
+	Kind RetentionEventKind
+	// OccurredAt is the required decision time, canonicalized to UTC microseconds.
+	// Adapter hold precedence follows acceptance order rather than this supplied time.
+	OccurredAt time.Time
 }
 
 // RetentionEvent appends hold state without rewriting an audit record or prior
@@ -70,9 +75,13 @@ func (event RetentionEvent) OccurredAt() time.Time { return event.occurredAt }
 // RetentionRequestInput supplies an explicit tenant scope, exclusive cutoff,
 // and mandatory candidate ceiling.
 type RetentionRequestInput struct {
+	// Tenant is the required candidate selection, not prune authorization.
 	Tenant TenantScope
+	// Before is the required exclusive recording-time cutoff, normalized to UTC
+	// microseconds.
 	Before time.Time
-	Limit  uint32
+	// Limit is the positive candidate ceiling, at most MaxQueryRecords.
+	Limit uint32
 }
 
 // RetentionRequest is a validated immutable archive-planning request.
@@ -143,7 +152,9 @@ func (candidate RetentionCandidate) Digest() []byte {
 // RetentionPlan is a bounded immutable archive-before-delete handoff.
 type RetentionPlan struct{ candidates []RetentionCandidate }
 
-// NewRetentionPlan validates, bounds, and defensively owns candidate digests.
+// NewRetentionPlan validates, bounds and copies candidate digests, sorting by
+// record ID for deterministic lock acquisition. Empty plans are valid; duplicate
+// candidates are not deduplicated. A plan is not evidence that archival succeeded.
 func NewRetentionPlan(candidates []RetentionCandidate) (RetentionPlan, error) {
 	if len(candidates) > int(MaxQueryRecords) {
 		return RetentionPlan{}, invalid("retention_plan", "exceeds limit")
@@ -173,12 +184,22 @@ func (plan RetentionPlan) Candidates() []RetentionCandidate {
 
 // RetentionApplyResult classifies planned candidates as deleted, held, or
 // changed since planning.
-type RetentionApplyResult struct{ Deleted, Held, Changed int }
+type RetentionApplyResult struct {
+	// Deleted, Held and Changed count removed candidates, newly held candidates,
+	// and candidates that are missing or no longer match the planned digest.
+	Deleted, Held, Changed int
+}
 
 // RetentionStore separates planning from deletion so archive/export callbacks
 // never execute while database locks are held.
 type RetentionStore interface {
+	// AppendRetentionEvent appends an idempotent hold/release without rewriting history.
+	// Its acknowledgement identifies the event, not the affected record.
 	AppendRetentionEvent(context.Context, RetentionEvent) (AppendResult, error)
+	// PlanRetention selects bounded digest-bound candidates without deleting them.
+	// The caller archives and verifies the plan outside storage locks.
 	PlanRetention(context.Context, RetentionRequest) (RetentionPlan, error)
+	// ApplyRetention rechecks persisted digests and holds before privileged deletion.
+	// It does not verify an archive; the caller must complete that handoff first.
 	ApplyRetention(context.Context, RetentionPlan) (RetentionApplyResult, error)
 }

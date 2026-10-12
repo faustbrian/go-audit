@@ -8,13 +8,19 @@ import (
 // Redactor removes or transforms policy-disallowed fields before persistence
 // and before any diagnostic observer receives an operation result.
 type Redactor interface {
+	// Redact returns a policy-safe record without changing identity or introducing
+	// attribute/change keys. Recorder validates allowed transformations and contains
+	// panics.
+	// Direct calls remain responsible for the implementation's errors and cancellation.
 	Redact(context.Context, Record) (Record, error)
 }
 
 // RedactorFunc adapts a function to Redactor.
 type RedactorFunc func(context.Context, Record) (Record, error)
 
-// Redact invokes the adapted redaction policy.
+// Redact invokes the adapted redaction policy and marks a nil-error result as
+// explicitly processed. It rejects a nil function/context but does not contain
+// panics, sanitize errors or validate record identity; Recorder adds those checks.
 func (redactor RedactorFunc) Redact(ctx context.Context, record Record) (Record, error) {
 	if redactor == nil || ctx == nil {
 		return Record{}, invalid("redactor", "must be assigned")
@@ -29,11 +35,18 @@ func (redactor RedactorFunc) Redact(ctx context.Context, record Record) (Record,
 // RedactionRules are deny-by-default allowlists for extensible data and
 // explicit removals for privacy-sensitive contextual fields.
 type RedactionRules struct {
-	DropDescription   bool
+	// DropDescription removes the optional summary when true; false retains it.
+	DropDescription bool
+	// DropNetworkOrigin removes network context when true.
 	DropNetworkOrigin bool
-	DropUserAgent     bool
+	// DropUserAgent removes user-agent context when true.
+	DropUserAgent bool
+	// AllowedAttributes lists exact case-sensitive keys to retain; empty removes all
+	// attributes.
 	AllowedAttributes []string
-	AllowedChanges    []string
+	// AllowedChanges lists exact case-sensitive keys to retain in Before and After.
+	// Empty removes all structured fields, preserving the explicit Redacted state.
+	AllowedChanges []string
 }
 
 type ruleRedactor struct {
@@ -42,7 +55,9 @@ type ruleRedactor struct {
 }
 
 // NewRedactor compiles deterministic redaction rules. Empty allowlists remove
-// every attribute or structured change key.
+// every attribute or structured change key. Allowlists are copied into sets;
+// duplicates collapse. Identity fields and other context are left unchanged,
+// and allowed values are not inspected for credentials.
 func NewRedactor(rules RedactionRules) (Redactor, error) {
 	limits := DefaultLimits()
 	attributes, err := allowlist("allowed_attributes", rules.AllowedAttributes, limits.MaxAttributeEntries)

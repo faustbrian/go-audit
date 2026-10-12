@@ -80,14 +80,22 @@ type canonicalRecord struct {
 
 // CanonicalJSON returns the versioned deterministic bytes used by integrity,
 // persistence, export, and cross-adapter comparison. Struct field order is
-// fixed and encoding/json sorts every map key lexicographically.
+// fixed and encoding/json sorts every map key lexicographically. Schema version
+// one uses encoding/json string escaping, UTC microsecond timestamps and lowercase
+// hexadecimal digests; it is not an RFC 8785 canonicalization implementation.
+// The returned bytes are caller-owned. This function encodes even a zero Record;
+// it does not validate, redact or authenticate the value.
 func CanonicalJSON(record Record) ([]byte, error) {
 	return json.Marshal(toCanonical(record))
 }
 
 // ParseCanonicalJSON strictly decodes one versioned canonical record and
 // reapplies all current size, identity, and privacy validation before taking
-// ownership of its mutable fields.
+// ownership of its mutable fields. Limits must already be valid; zero does not
+// select defaults. The input must exactly equal the re-encoded schema-v1 bytes,
+// so whitespace, duplicate members and alternate escaping/order are rejected.
+// Parsing verifies metadata shape, not chain authenticity, and does not mark
+// redaction as applied in this process. It retains no alias of encoded.
 func ParseCanonicalJSON(encoded []byte, limits Limits) (Record, error) {
 	if err := limits.Validate(); err != nil {
 		return Record{}, err

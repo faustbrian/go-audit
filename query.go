@@ -96,7 +96,9 @@ func (scope TenantScope) Includes(value string) bool {
 }
 
 // Cursor is a stable exclusive position ordered by recording time and record
-// ID. Its fields are private so malformed cursor state cannot be constructed.
+// ID, with an optional adapter-owned acceptance watermark. Its fields are
+// private, but its encoded form is unsigned and does not bind filters, tenant
+// scope or authorization. Reuse it only with the original adapter and filters.
 type Cursor struct {
 	recordedAt time.Time
 	recordID   string
@@ -126,7 +128,9 @@ func NewCursor(recordedAt time.Time, recordID string) (Cursor, error) {
 	return Cursor{recordedAt: canonicalTime(recordedAt), recordID: recordID}, nil
 }
 
-// ParseCursor decodes the versioned URL-safe cursor representation.
+// ParseCursor decodes bounded unpadded URL-safe base64 v1 live or v2 snapshot
+// cursor fields. It validates their shape, not authenticity or adapter provenance;
+// it is not a byte-canonical parser like ParseCanonicalJSON.
 func ParseCursor(value string) (Cursor, error) {
 	if len(value) > base64.RawURLEncoding.EncodedLen(DefaultLimits().MaxFieldBytes+maxCursorEnvelopeBytes) {
 		return Cursor{}, invalid("cursor", "is malformed")
@@ -194,18 +198,27 @@ func (cursor Cursor) String() string {
 // QueryInput supplies bounded filters. Time bounds are inclusive. After is an
 // exclusive stable cursor. Tenant scope is always required.
 type QueryInput struct {
-	Tenant                                                           TenantScope
-	From, Through                                                    time.Time
+	// Tenant is the required selection scope, not read authorization.
+	Tenant TenantScope
+	// From and Through are inclusive recording-time bounds; zero leaves the bound absent.
+	From, Through time.Time
+	// RecordID, ActorID, SubjectType, SubjectID, Action and CorrelationID are optional
+	// exact-match filters; empty disables each filter.
 	RecordID, ActorID, SubjectType, SubjectID, Action, CorrelationID string
-	Outcome                                                          Outcome
-	Limit                                                            uint32
-	After                                                            Cursor
+	// Outcome is an exact-match filter; zero disables it.
+	Outcome Outcome
+	// Limit must be positive and no greater than MaxQueryRecords.
+	Limit uint32
+	// After is an exclusive position from the same adapter and unchanged filter set.
+	After Cursor
 }
 
 // Query is a validated immutable authorization-neutral query.
 type Query struct{ input QueryInput }
 
-// NewQuery validates bounded deterministic query options.
+// NewQuery validates bounded deterministic query options and normalizes time
+// bounds to UTC microseconds. It does not authorize a tenant selection or prove
+// that a cursor originated with the same adapter and filters.
 func NewQuery(input QueryInput) (Query, error) {
 	if !input.Tenant.Valid() {
 		return Query{}, invalid("tenant_scope", "must be explicit")
@@ -277,16 +290,23 @@ func (query Query) After() Cursor { return query.input.After }
 
 // Page is one stable bounded query page. Next is zero on the final page.
 type Page struct {
+	// Records contains the caller-visible page slice of immutable record values.
 	Records []Record
-	Next    Cursor
+	// Next is the exclusive continuation cursor, or zero when no further page was found.
+	Next Cursor
 }
 
 // Reader executes bounded authorization-neutral queries.
 type Reader interface {
+	// Query returns at most Query.Limit records in recording-time/ID order.
+	// The caller owns authorization and must preserve filters when continuing a page.
 	Query(context.Context, Query) (Page, error)
 }
 
 // Exporter streams stable ordered records without defining read authorization.
 type Exporter interface {
+	// Export invokes the synchronous consumer in stable order for at most Query.Limit
+	// records. Partial consumption is possible before failure; consumers must not block
+	// indefinitely or assume that returned errors undo their own side effects.
 	Export(context.Context, Query, func(Record) error) error
 }

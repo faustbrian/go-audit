@@ -5,9 +5,11 @@ the independent root-v1 adapter's storage conventions, not a v2 integration.
 No currently released PostgreSQL adapter accepts v2 records; v2 consumers need
 application-owned storage integration pending a separate adapter migration.
 
-`Builder` is the only public constructor for `Record`. It validates all
-required identities, bounds, maps, privacy namespaces, changes, and integrity
-metadata, then owns mutable inputs. Map and digest accessors return copies.
+`Builder` constructs new records; `ParseCanonicalJSON` restores records from
+schema-v1 canonical bytes. Construction validates required identities, bounds,
+maps, privacy namespaces, changes and integrity metadata shape, then owns mutable
+inputs. Neither path proves identity truth, ID uniqueness or digest authenticity.
+Map and digest accessors return copies.
 
 An empty optional string means absent. Unknown is explicit through
 `ActorUnknown` or `OutcomeUnknown`; it is not inferred from an empty value.
@@ -19,14 +21,18 @@ invalid where the contract requires an explicit choice.
 
 Record IDs are caller-independent cryptographically random UUID-shaped values
 by default. An injected generator may provide another globally unique stable
-ID. Identity never depends on map iteration, process counters, database
-ordering, or a database-generated sequence. Recording time comes from the
-builder clock and occurrence time from the caller; both are canonical UTC at
-microsecond precision so ordering is stable across the PostgreSQL adapter.
+ID; the library validates its shape but does not enforce uniqueness. Default
+identity does not depend on map iteration, process counters, database ordering
+or a database-generated sequence; injected generation is application-owned.
+Recording time comes from the builder clock and occurrence time from the
+caller; both are canonical UTC at microsecond precision so ordering is stable
+across the PostgreSQL adapter.
 
-`CanonicalJSON` is versioned deterministic encoding. `ParseCanonicalJSON`
-strictly rejects alternate byte representations, unknown fields, trailing
-values, malformed times and digests, unsupported schema versions, and values
+`CanonicalJSON` is package-owned schema-v1 deterministic encoding, not RFC 8785
+canonicalization. It encodes a value without validating or redacting it.
+`ParseCanonicalJSON` strictly rejects alternate byte representations, unknown
+fields, trailing values, malformed times and digests, unsupported schema
+versions, and values
 outside the configured limits. Parsing does not assert that redaction ran in
 the current process; adapters restore that trusted state only after verifying
 their persisted canonical digest.

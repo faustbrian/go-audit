@@ -119,8 +119,8 @@ This module contains one public `postgres` package:
 
 - `Store` implements durable append, bounded stable query, and streaming
   export over a caller-owned `pgxpool.Pool`.
-- `TxWriter` stages an atomic bounded batch in a caller-owned `pgx.Tx`; only
-  the caller commits or rolls back the business transaction.
+- `TxWriter` stages an atomic bounded batch in a caller-owned `pgx.Tx`.
+  Only the caller commits; stage failures may require or attempt outer rollback.
 - `RetentionAdmin` provides separately privileged legal-hold and
   archive-before-delete operations.
 - `Migrations`, `FreshInstallPreflightSQL`, and `PrivilegeSQL` expose the
@@ -157,9 +157,11 @@ distinguishes rejected, committed, and unknown durability outcomes.
 transaction that must be retried in full. Database diagnostics are deliberately
 sanitized.
 
-`NewTx` stages each bounded batch behind a savepoint. Ordinary failures roll
-back that batch; deadlock or serialization failure aborts the whole caller
-transaction. Query results and export callbacks are bounded, ordered, and
+`NewTx` stages each bounded batch behind a savepoint. Ordinary failures attempt
+rollback of that batch; deadlock, serialization or failed savepoint cleanup
+attempts rollback of the whole caller transaction. Cleanup success is not
+guaranteed; callers must finish or discard an unusable transaction. Query
+results and export callbacks are bounded, ordered, and
 closed before return. See the [package API](https://pkg.go.dev/github.com/faustbrian/go-audit/postgres)
 and [adapter documentation index](docs/README.md) for the detailed contracts.
 

@@ -16,7 +16,10 @@ BEGIN
 END
 $audit_fresh_install_preflight$;`
 
-// Migrations returns the immutable engine-neutral migration source.
+// Migrations returns the embedded PostgreSQL SQL files rooted at the migrations
+// directory. It neither applies them nor owns a migration runner. Preserve
+// published file checksums and apply forward migrations with deployment-owned
+// credentials; the files are not portable SQL for arbitrary database engines.
 func Migrations() fs.FS {
 	files, _ := fs.Sub(migrationFiles, "migrations")
 	return files

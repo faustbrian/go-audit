@@ -1,5 +1,15 @@
 // Package postgres provides the separately releasable PostgreSQL adapter for
 // audit without adding pgx or database dependencies to the core module.
+// This independently versioned module consumes github.com/faustbrian/go-audit
+// v1 records, not root-v2 records. Applications own pools, authorization,
+// migrations, deployment-specific roles and archive/retention policy.
+//
+// Store commits atomic batches; TxWriter only stages in a caller transaction.
+// RetentionAdmin is a separately privileged boundary, not an archive verifier.
+// Calls start no background workers. Cancellation is cooperative; rollback
+// attempts deliberately retain context values while detaching cancellation
+// under a five-second timeout. Driver diagnostics are hidden behind safe text
+// and errors.Is classifications, rather than exposed through unwrapping.
 package postgres
 
 import (
@@ -21,8 +31,12 @@ import (
 const rollbackTimeout = time.Duration(5_000_000_000)
 
 const (
+	// DefaultMaxBatchBytes is the 16 MiB canonical payload budget selected by a zero
+	// override.
 	DefaultMaxBatchBytes = 16 << 20
-	MaxBatchBytes        = 64 << 20
+	// MaxBatchBytes is the absolute 64 MiB canonical payload ceiling for one append or
+	// stage.
+	MaxBatchBytes = 64 << 20
 )
 
 var (
@@ -39,9 +53,15 @@ var (
 // Config bounds decoded records and append batches. Zero values select core
 // defaults and the absolute core batch ceiling.
 type Config struct {
-	Limits          audit.Limits
+	// Limits bounds canonical decoding; an entirely zero value selects root-v1 defaults.
+	// Root-v1 callers must also retain the pre-construction work bounds in SECURITY.md.
+	Limits audit.Limits
+	// MaxBatchRecords selects a positive count ceiling up to audit.MaxAppendBatchRecords;
+	// zero uses that ceiling.
 	MaxBatchRecords int
-	MaxBatchBytes   int
+	// MaxBatchBytes caps total canonical payload bytes; zero uses DefaultMaxBatchBytes.
+	// It does not measure driver, SQL protocol or heap overhead.
+	MaxBatchBytes int
 }
 
 type database interface {
@@ -61,8 +81,9 @@ type Store struct {
 
 // TxWriter stages records in one caller-owned pgx transaction. It deliberately
 // does not implement audit.Sink because a successful Stage is not durable until
-// the caller commits. A retryable transaction failure rolls back the complete
-// caller transaction so it cannot retain locks or be committed partially.
+// the caller commits. A retryable failure or failed savepoint cleanup attempts
+// rollback of the complete caller transaction. The caller must finish or discard
+// an unusable transaction if cleanup fails; rollback success is not guaranteed.
 type TxWriter struct {
 	tx              pgx.Tx
 	limits          audit.Limits
@@ -84,7 +105,9 @@ func New(pool *pgxpool.Pool, config Config) (*Store, error) {
 }
 
 // NewTx constructs a staging writer over a caller-owned transaction. The
-// caller alone commits or rolls back that transaction.
+// caller commits the business transaction and owns its concurrency/lifecycle.
+// Stage may roll back the whole transaction after retryable errors or failed
+// savepoint cleanup; it never commits the outer transaction.
 func NewTx(tx pgx.Tx, config Config) (*TxWriter, error) {
 	limits, maximum, maximumBytes, err := validateConfig(config)
 	if err != nil {
@@ -127,7 +150,10 @@ func validateConfig(config Config) (audit.Limits, int, int, error) {
 // Stage inserts an atomic bounded batch without committing the caller-owned
 // transaction. Ordinary stage failures roll back only the batch savepoint; a
 // deadlock or serialization failure rolls back the complete transaction, which
-// must be retried with identical record IDs.
+// must be retried with identical record IDs. Failed savepoint rollback also
+// triggers an outer rollback attempt. All rollback attempts use a fresh detached
+// five-second timeout; errors still require the caller to finish/discard an
+// unusable transaction. A successful result acknowledges staging, not durability.
 func (writer *TxWriter) Stage(ctx context.Context, records []audit.Record) (audit.BatchResult, error) {
 	if writer == nil || writer.tx == nil || ctx == nil {
 		return audit.BatchResult{}, audit.NewAppendError(audit.AppendRejected, audit.ErrInvalidArgument)
@@ -186,7 +212,11 @@ func (store *Store) Append(ctx context.Context, record audit.Record) (audit.Appe
 
 // AppendBatch atomically inserts a bounded input-order batch. A commit error
 // is unknown; every earlier validation, begin, or statement error is a
-// confirmed rejection. Retrying identical IDs is safe.
+// confirmed rejection. Retrying identical IDs and canonical bytes is idempotent,
+// including after pruning because identity tombstones remain. Every input must
+// have crossed an explicit redaction boundary. Preparation revalidates canonical
+// bytes against configured decode limits; it does not verify a chain or authorize
+// the supplied actor/tenant. The input slice must remain unchanged during use.
 func (store *Store) AppendBatch(ctx context.Context, records []audit.Record) (audit.BatchResult, error) {
 	if store == nil || store.pool == nil || ctx == nil {
 		return audit.BatchResult{}, audit.NewAppendError(audit.AppendRejected, audit.ErrInvalidArgument)
@@ -283,7 +313,10 @@ func insert(ctx context.Context, tx pgx.Tx, value preparedRecord) (audit.AppendS
 }
 
 // Query returns one bounded page ordered by recording time then record ID. It
-// conveys no read authorization and closes database rows on every path.
+// conveys no read authorization and closes database rows on every path. Fresh
+// queries capture an acceptance watermark; continuations exclude later accepts.
+// Persisted canonical SHA-256 and schema-v1 bytes are checked before exposure,
+// but this unkeyed digest is not chain authentication. Page slices are caller-owned.
 func (store *Store) Query(ctx context.Context, query audit.Query) (audit.Page, error) {
 	if store == nil || store.pool == nil || ctx == nil || !query.Valid() {
 		return audit.Page{}, fmt.Errorf("%w: PostgreSQL query", audit.ErrInvalidArgument)
@@ -329,8 +362,12 @@ func (store *Store) Query(ctx context.Context, query audit.Query) (audit.Page, e
 	return page, nil
 }
 
-// Export streams at most Query.Limit canonical records without buffering or
-// holding adapter locks. The callback runs in stable export order.
+// Export streams at most Query.Limit records without collecting the full result
+// set. The callback runs in recording-time/ID order while rows and their database
+// connection remain open, but no adapter transaction lock is held. Persisted
+// digests/canonical bytes are checked. Consumer side effects before a failure are
+// not undone; ordinary callback errors/panics become audit.ErrExportConsumerFailed,
+// while cancellation/deadline classifications remain public. Callbacks are synchronous.
 func (store *Store) Export(ctx context.Context, query audit.Query, consume func(audit.Record) error) error {
 	if store == nil {
 		return fmt.Errorf("%w: PostgreSQL export", audit.ErrInvalidArgument)
@@ -478,9 +515,14 @@ type databaseError struct {
 	cause     error
 }
 
+// Error returns only a fixed operation label, never the retained driver diagnostic.
 func (failure *databaseError) Error() string {
 	return "audit/postgres: " + failure.operation + " failed"
 }
+
+// Is preserves cause classification and maps deadlock/serialization SQLSTATEs
+// to ErrRetryableTransaction. It contains panicking classifiers and exposes no
+// raw cause through an Unwrap method.
 func (failure *databaseError) Is(target error) (matches bool) {
 	defer func() {
 		if recover() != nil {
@@ -495,6 +537,8 @@ func (failure *databaseError) Is(target error) (matches bool) {
 	return errors.Is(failure.cause, target)
 }
 
+// Keep cleanup possible after caller cancellation without detaching it into a
+// background worker. The timeout bounds the context, not an uncooperative driver.
 func rollback(parent context.Context, tx pgx.Tx) error {
 	ctx, cancel := context.WithTimeout(context.WithoutCancel(parent), rollbackTimeout)
 	defer cancel()

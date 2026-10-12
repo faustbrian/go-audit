@@ -22,20 +22,29 @@ const (
 // or Merkle-root operation accepts.
 const MaxIntegrityRecords = 1_000
 
+// ErrKeyUnavailable reports an opaque key-provider failure or panic.
 var ErrKeyUnavailable = errors.New("audit: integrity key is unavailable")
 
-// IntegrityKey is external key-rotation metadata. Bytes are copied and never
-// included in records, errors, or diagnostics.
+// IntegrityKey supplies external key-rotation metadata. Chain copies key bytes
+// and excludes them from records and its diagnostics; the provider must avoid
+// exposing them through its own diagnostics or direct calls.
 type IntegrityKey struct {
-	ID    string
+	// ID is the bounded nonempty rotation identifier recorded with an HMAC link.
+	ID string
+	// Bytes contains 32 to 1024 key bytes, copied by Chain for each operation.
+	// The provider owns key generation, custody and lifetime; copies are not explicitly
+	// erased.
 	Bytes []byte
 }
 
 // KeyRequest selects the current key for sealing when KeyID is empty, or the
 // exact persisted historical key for verification when KeyID is present.
 type KeyRequest struct {
-	Partition  string
-	KeyID      string
+	// Partition selects the caller-owned chain/key scope.
+	Partition string
+	// KeyID is empty for sealing and otherwise selects the exact persisted historical key.
+	KeyID string
+	// RecordedAt is the record time for the provider's caller-owned rotation policy.
 	RecordedAt time.Time
 }
 
@@ -43,6 +52,8 @@ type KeyRequest struct {
 // caller-owned synchronous dependencies: they must honor context cancellation,
 // bound their own latency and resource use, and support concurrent calls.
 type KeyProvider interface {
+	// Key returns the requested current or historical key. Chain contains provider
+	// panics and sanitizes errors; direct callers do not receive that wrapper.
 	Key(context.Context, KeyRequest) (IntegrityKey, error)
 }
 
@@ -61,16 +72,22 @@ func (provider KeyProviderFunc) Key(ctx context.Context, request KeyRequest) (In
 // ChainConfig selects the digest algorithm, external HMAC key source, and
 // optional identifier-free observer.
 type ChainConfig struct {
+	// Algorithm is required and selects SHA-256 or HMAC-SHA-256.
 	Algorithm IntegrityAlgorithm
-	Keys      KeyProvider
-	Observer  Observer
+	// Keys is required for HMAC; unkeyed SHA-256 never calls it.
+	Keys KeyProvider
+	// Observer optionally receives synchronous identifier-free verification failures.
+	Observer Observer
 }
 
 // ChainLink supplies caller-persisted ordering state for the next record.
 // PreviousDigest remains caller-owned and is copied by Seal.
 type ChainLink struct {
-	Partition      string
-	Sequence       uint64
+	// Partition is the required stable caller-owned ordering scope.
+	Partition string
+	// Sequence is positive and caller-allocated; one requires an empty PreviousDigest.
+	Sequence uint64
+	// PreviousDigest must contain 32 bytes after sequence one and is copied by Seal.
 	PreviousDigest []byte
 }
 
@@ -82,14 +99,16 @@ type Chain struct {
 	observer  Observer
 }
 
-// Checkpoint binds a partition's durable sequence to its verified digest.
+// Checkpoint carries a partition, sequence and digest boundary. Construction
+// validates shape only; the caller must obtain, verify and retain it independently.
 type Checkpoint struct {
 	partition string
 	sequence  uint64
 	digest    []byte
 }
 
-// NewCheckpoint validates and defensively copies one durable chain boundary.
+// NewCheckpoint validates the fields and copies the 32-byte digest. It performs
+// no persistence or authenticity verification of the supplied boundary.
 func NewCheckpoint(partition string, sequence uint64, digest []byte) (Checkpoint, error) {
 	if err := boundedRequired("checkpoint_partition", partition, DefaultLimits().MaxFieldBytes); err != nil {
 		return Checkpoint{}, invalid("checkpoint", "must be complete")
@@ -123,7 +142,11 @@ func NewChain(config ChainConfig) (*Chain, error) {
 
 // Seal returns a copied record containing the supplied partition and sequence
 // plus a deterministic digest. The caller remains responsible for serialized
-// durable sequence allocation and checkpoint persistence.
+// durable sequence allocation and checkpoint persistence. Redact before sealing;
+// Recorder rejects redaction that changes sealed canonical bytes. Seal hashes
+// schema-v1 canonical bytes with only the current digest omitted, including key
+// ID and previous digest. It does not verify the supplied predecessor or persist
+// anything; existing integrity metadata is replaced.
 func (chain *Chain) Seal(ctx context.Context, record Record, link ChainLink) (Record, error) {
 	if chain == nil || ctx == nil || record.ID() == "" || link.Sequence == 0 {
 		return Record{}, invalid("chain_link", "must be complete")
@@ -151,7 +174,10 @@ func (chain *Chain) Seal(ctx context.Context, record Record, link ChainLink) (Re
 	return sealed, nil
 }
 
-// Verify checks a complete single-partition chain beginning at sequence one.
+// Verify checks one nonempty, bounded single-partition chain starting at sequence
+// one. It verifies supplied links, not that no later records were omitted: an
+// internally consistent prefix passes. Use VerifyFromCheckpoint with an
+// independently trusted final boundary to detect truncation.
 func (chain *Chain) Verify(ctx context.Context, records []Record) error {
 	if chain == nil {
 		return ErrIntegrityInvalid
@@ -170,7 +196,9 @@ func (chain *Chain) Verify(ctx context.Context, records []Record) error {
 }
 
 // VerifyFromCheckpoint verifies an archived suffix and requires it to end at
-// expectedFinal, detecting missing prefixes, links, and truncated exports.
+// expectedFinal, detecting omitted links or truncation relative to these trusted
+// caller-supplied boundaries. The suffix may be empty only when its boundaries
+// agree. It neither loads nor authenticates checkpoints independently.
 func (chain *Chain) VerifyFromCheckpoint(ctx context.Context, previous Checkpoint, records []Record, expectedFinal Checkpoint) error {
 	if chain == nil {
 		return ErrIntegrityInvalid
@@ -264,7 +292,10 @@ func safeKeyFailure(err error) (result error) {
 }
 
 // MerkleRoot returns an order-sensitive deterministic SHA-256 Merkle root over
-// canonical record bytes. Odd levels duplicate their final node.
+// canonical record bytes. Leaves are SHA256(canonical bytes); internal nodes
+// are SHA256(0x01 || left || right). Odd levels duplicate their final node.
+// A single-record root is its leaf digest. The returned bytes are caller-owned;
+// this unkeyed construction alone does not establish authenticity or completeness.
 func MerkleRoot(records []Record) ([]byte, error) {
 	if len(records) == 0 || len(records) > MaxIntegrityRecords {
 		return nil, invalid("merkle_records", "must contain a bounded record count")

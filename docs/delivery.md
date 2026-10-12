@@ -23,11 +23,12 @@ retaining arbitrary dependency diagnostics. Cancellation and deadline
 classifications remain inspectable. Panicking custom `Is`, `As`, or outcome
 classifiers are contained and conservatively mapped to an opaque failure.
 
-Every sink acknowledgement is checked against submitted record IDs, statuses,
-batch length, and input order. A malformed acknowledgement is an unknown
-outcome and is never allowed to trigger an unqualified success. A confirmed
-committed error is reported as persisted and does not enter fail-open or buffer
-fallback.
+Nil-error sink acknowledgements are checked against submitted record IDs,
+statuses, batch length and input order. A malformed acknowledgement is an unknown
+outcome and cannot trigger unqualified success. A confirmed-commit error is
+reported as persisted with the sink result and an error, without acknowledgement
+validation, and does not enter fail-open or buffer fallback. Inspect that error;
+the persisted disposition alone does not certify the returned member results.
 
 No production component starts a background goroutine. A `DurableBuffer` must
 report finite record, batch, and persisted-byte capacity before a recorder is
