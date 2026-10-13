@@ -1,5 +1,8 @@
 # Threat model and compliance boundary
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Adoption patterns](adoption.md)
+
 The library treats every caller, record field, sink result, database response,
 and export consumer as untrusted input. Validation and defensive ownership
 limit field injection and alias mutation. Explicit tenant scopes reduce tenant

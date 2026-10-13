@@ -1,10 +1,7 @@
 # audit
 
 [![CI](https://github.com/faustbrian/go-audit/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/faustbrian/go-audit/actions/workflows/ci.yml)
-[![CodeQL](https://img.shields.io/badge/CodeQL-required-blue)](https://github.com/faustbrian/go-audit/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/badge/coverage-100%25_required-blue)](CONTRIBUTING.md#verification)
-[![Mutation](https://img.shields.io/badge/mutation-local%20%2F%20scheduled-blue)](CONTRIBUTING.md#verification)
-[![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
+[![Documentation](https://img.shields.io/badge/docs-adoption_and_API-blue)](docs/index.md)
 [![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-audit/v2.svg)](https://pkg.go.dev/github.com/faustbrian/go-audit/v2)
 [![Release](https://img.shields.io/github/v/release/faustbrian/go-audit?sort=semver)](https://github.com/faustbrian/go-audit/releases)
 [![Go](https://img.shields.io/badge/go-1.27.0-00ADD8?logo=go)](https://go.dev/)
@@ -27,6 +24,17 @@ The published root module is `github.com/faustbrian/go-audit/v2`.
 Do not use local `replace` directives to consume this checkout as v1. The
 PostgreSQL module remains on its independent v1 line and uses root-v1 records.
 See [migration guidance](COMPATIBILITY.md) before adopting bounded v2 behavior.
+
+## Adoption entry points
+
+The root module is `github.com/faustbrian/go-audit/v2` (stable).
+It requires Go 1.27.0. Pin the published `v2.0.2` root tag
+with `go get github.com/faustbrian/go-audit/v2@v2.0.2`.
+Install only the modules your application imports; nested module status and
+migration boundaries remain documented separately.
+
+Start with the [documentation map](docs/index.md) for package selection,
+examples, operational constraints, and contributor references.
 
 ## Install
 

@@ -1,5 +1,8 @@
 # Assurance and security review
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API and record semantics](api.md)
+
 The released-v1 inventory is preserved in `api/baseline.txt`; the active
 v2 API baseline is `api/v2.txt`. The implementation inventory is the
 record and canonical structures in `record.go` and `canonical.go`, the sink and

@@ -1,5 +1,8 @@
 # Documentation
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Documentation map](index.md)
+
 - [Package overview and installation](../README.md)
 - [Compiler-checked examples](../examples_test.go)
 - [Go package reference](https://pkg.go.dev/github.com/faustbrian/go-audit/v2)

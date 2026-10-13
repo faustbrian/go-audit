@@ -1,5 +1,8 @@
 # PostgreSQL adapter and operations
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API and record semantics](api.md)
+
 This guide describes the independently released PostgreSQL v1 adapter, which
 uses root-v1 record types. It cannot accept root-v2 records. Root-v2 consumers
 need application-owned storage integration until a separately reviewed adapter

@@ -1,5 +1,8 @@
 # Adoption patterns
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API and record semantics](api.md)
+
 Construct the audit record at the application boundary that already knows the
 authenticated actor, stable subject, business action, outcome, and tenant.
 The package does not authenticate, authorize, invent action names, discover

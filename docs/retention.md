@@ -1,5 +1,8 @@
 # Retention, archival, erasure, and legal hold
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API and record semantics](api.md)
+
 Retention is archive-before-delete and two phase. `PlanRetention` returns
 bounded candidates bound to each persisted canonical SHA-256 digest. Archive
 and verify them outside database locks, then pass the unchanged plan to

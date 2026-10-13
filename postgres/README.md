@@ -1,5 +1,8 @@
 # audit/postgres
 
+[Documentation map](../docs/index.md) · [Repository README](../README.md)
+[Next: Documentation map](../docs/index.md)
+
 `audit/postgres` is the separately releasable PostgreSQL persistence adapter
 for the core [`audit`](https://pkg.go.dev/github.com/faustbrian/go-audit)
 contracts. It owns append-only storage, bounded queries and exports,

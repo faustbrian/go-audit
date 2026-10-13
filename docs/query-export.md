@@ -1,5 +1,8 @@
 # Query and export
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API and record semantics](api.md)
+
 Every query requires exact tenant, explicitly absent tenant, or all tenants.
 This selection conveys no read authorization. Filters cover record ID,
 inclusive recording time, actor, subject type and ID, action, correlation, and

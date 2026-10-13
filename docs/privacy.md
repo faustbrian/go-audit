@@ -1,5 +1,8 @@
 # Privacy and redaction
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Adoption patterns](adoption.md)
+
 Redaction runs before persistence. Recorder surfaces redaction failure through
 an opaque safe diagnostic; it preserves cancellation and deadline sentinels but
 does not retain arbitrary redactor errors that may contain rejected data.

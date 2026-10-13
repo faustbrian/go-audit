@@ -1,5 +1,8 @@
 # API and record semantics
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Adoption patterns](adoption.md)
+
 This source tree documents the root-v2 API. PostgreSQL references describe
 the independent root-v1 adapter's storage conventions, not a v2 integration.
 No currently released PostgreSQL adapter accepts v2 records; v2 consumers need

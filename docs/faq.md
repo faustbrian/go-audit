@@ -1,5 +1,8 @@
 # FAQ
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API and record semantics](api.md)
+
 ## Is an event store an audit trail?
 
 No. Domain events and event-sourcing history serve business state reconstruction.

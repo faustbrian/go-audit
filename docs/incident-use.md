@@ -1,5 +1,8 @@
 # Incident use
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API and record semantics](api.md)
+
 Authorize a bounded tenant scope and time window outside the library. Export in
 stable cursor order to a restricted incident workspace, verify chain or Merkle
 anchors before analysis, and record who requested and accessed privileged

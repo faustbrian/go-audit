@@ -1,5 +1,8 @@
 # Source documentation audit
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API and record semantics](api.md)
+
 ## Scope and compact plan
 
 Base: `54c4e6f2b30ab94fb854d26440ece1803f8a5023` (`origin/main`).

@@ -1,5 +1,8 @@
 # Delivery and failure modes
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API and record semantics](api.md)
+
 Every sink call accepts `context.Context`. Callers must provide deadlines for
 external operations. Cancellation before an append is a confirmed rejection;
 a commit failure is unknown and must be reconciled by record ID. Validation,

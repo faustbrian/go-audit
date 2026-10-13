@@ -1,5 +1,8 @@
 # Integrity and export verification
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API and record semantics](api.md)
+
 `Chain` supports SHA-256 and HMAC-SHA-256 using standard-library primitives.
 HMAC keys come from `KeyProvider`; the library does not store or derive keys.
 Partition chains by a stable scope whose ordering can be serialized, commonly
