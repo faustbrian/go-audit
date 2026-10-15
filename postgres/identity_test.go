@@ -24,7 +24,9 @@ func TestIdentityContributorDoesNotOwnTransactions(t *testing.T) {
 	if e := c.PersistAudits(context.Background(), identitypostgres.Work{}); e == nil {
 		t.Fatal("zero Work accepted")
 	}
-	if e := c.PersistAudits(nil, identitypostgres.Work{}); e == nil {
+	// This is deliberate invalid-input coverage, not an omitted live context.
+	var missingContext context.Context
+	if e := c.PersistAudits(missingContext, identitypostgres.Work{}); e == nil {
 		t.Fatal("nil context accepted")
 	}
 	if e := (*IdentityContributor)(nil).PersistAudits(context.Background(), identitypostgres.Work{}); e == nil {
