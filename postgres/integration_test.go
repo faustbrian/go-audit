@@ -1021,6 +1021,13 @@ func TestPostgreSQLBackupRestoreAndReconciliation(t *testing.T) {
 	if acceptedOrder != 1 || legacyWriterUsage {
 		t.Fatalf("hardened legacy state = order %d, legacy writer usage %t", acceptedOrder, legacyWriterUsage)
 	}
+	// Preserve the populated migration-4 rolling-writer assertions above,
+	// then install the complete schema required by current privilege grants.
+	for _, migration := range []string{"000005_identity_command_bindings.sql", "000006_identity_recovery_evidence.sql"} {
+		if _, err := pool.Exec(ctx, migrationUpSQLFile(t, migration)); err != nil {
+			t.Fatal(err)
+		}
+	}
 	configureTestRoles(t, ctx, pool, database.DSN())
 	store, err := auditpostgres.New(pool, auditpostgres.Config{})
 	if err != nil {

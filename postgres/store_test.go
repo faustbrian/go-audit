@@ -20,11 +20,13 @@ func TestAdapterExposesAppendOnlyLeastPrivilegeSchema(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(entries) != 4 ||
+	if len(entries) != 6 ||
 		entries[0].Name() != "000001_create_audit.sql" ||
 		entries[1].Name() != "000002_harden_audit.sql" ||
 		entries[2].Name() != "000003_fixed_role_safety.sql" ||
-		entries[3].Name() != "000004_durability_hardening.sql" {
+		entries[3].Name() != "000004_durability_hardening.sql" ||
+		entries[4].Name() != "000005_identity_command_bindings.sql" ||
+		entries[5].Name() != "000006_identity_recovery_evidence.sql" {
 		t.Fatalf("migration entries = %#v", entries)
 	}
 	initial, err := fs.ReadFile(files, entries[0].Name())

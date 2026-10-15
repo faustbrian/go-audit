@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add an identity transaction contributor for immutable command/index audit
+  bindings and retained participant recovery evidence. Audit effects stage only
+  through the owning coordinator; no independent transaction or commit is added.
+- Add forward migrations 5 and 6 and writer-only function execution grants.
+  Apply both migrations before regenerating deployment grants. Existing audit
+  records, migrations 1–4 and root-v1 record compatibility remain unchanged.
+
 ### Documentation
 
 - Clarify root-v1 adapter compatibility, caller resource ownership, staging and

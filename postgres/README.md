@@ -36,6 +36,23 @@ Applications import the package using its conventional identifier:
 import auditpostgres "github.com/faustbrian/go-audit/postgres"
 ```
 
+## Identity transaction contributor (unreleased)
+
+`NewIdentityContributor` supplies the identity coordinator's audit and recovery
+phases using the existing root-v1 record contract. It owns no pool or transaction
+and cannot commit a protected command. Apply all embedded migrations, including
+5 and 6, before applying `PrivilegeSQL` with deployment-owned role names. Only
+the writer receives execution on the two identity routines; direct binding-table
+reads or mutations are not granted.
+
+The immutable tenant/command/index binding preserves the original event ID,
+canonical digest and retention-policy version across retries and payload
+pruning. Conflicts fail closed; failed prefixes require coordinator rollback
+or reconciliation. Recovery is participant evidence, never a command receipt.
+Its positive-evidence profile is single-audit: extra or conflicting bindings
+remain unknown; multi-slot recovery can prove unanimous absence, not fabricate
+completion. These additions are not included in the published postgres/v1.0.1.
+
 ## Five-minute quick start
 
 The example assumes the embedded migrations and deployment-specific grants

@@ -49,9 +49,11 @@ GRANT EXECUTE ON FUNCTION audit.append_record(
     text, timestamptz, timestamptz, text, smallint, text, text, text, text,
     smallint, text, bytea, bytea
 ) TO %s;
+GRANT EXECUTE ON FUNCTION audit.append_identity_record(text, bytea, integer, numeric, bytea, bytea) TO %s;
+GRANT EXECUTE ON FUNCTION audit.identity_record_status(text, bytea, integer, numeric, bytea) TO %s;
 GRANT SELECT ON audit.records, audit.retention_events TO %s;
 GRANT SELECT ON audit.records TO %s;
 GRANT INSERT, SELECT ON audit.retention_events TO %s;
 GRANT EXECUTE ON FUNCTION audit.prune_record(text, bytea) TO %s;
-`, writer, reader, retention, writer, reader, retention, retention, retention), nil
+`, writer, reader, retention, writer, writer, writer, reader, retention, retention, retention), nil
 }
