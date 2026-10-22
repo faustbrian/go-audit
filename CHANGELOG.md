@@ -3,6 +3,14 @@
 All notable changes to this module will be documented here. The format follows
 Keep a Changelog, and releases follow Semantic Versioning.
 
+## 2.1.0 - 2026-10-22
+
+### Changed
+
+- Publish the current source and documentation with a fresh immutable tag.
+- Publish independently versioned modules from the same source snapshot:
+  - `postgres/v1.1.0`.
+
 ## [Unreleased]
 
 ### Documentation
