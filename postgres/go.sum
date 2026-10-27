@@ -43,8 +43,8 @@ github.com/faustbrian/go-capability/v2 v2.0.2-0.20261015044219-caab644d2fec h1:z
 github.com/faustbrian/go-capability/v2 v2.0.2-0.20261015044219-caab644d2fec/go.mod h1:ssUHOHCArf/XQ+xfzVOmiDsV3eTPJeS2hyFH5uhqIJE=
 github.com/faustbrian/go-cli v1.0.0 h1:K+hYLS572nR/tz/zqkyjN7RT6wa96Ln710Fp1azj2tU=
 github.com/faustbrian/go-cli v1.0.0/go.mod h1:pvGIf3RUGkGjlA7oJwPdTuWkH/lLWgQjroJZEhkrZMM=
-github.com/faustbrian/go-clock v1.2.0 h1:vy2700wB/gaXRgW7zWw1iF7twxrKDyL3dSd3fz1DdAA=
-github.com/faustbrian/go-clock v1.2.0/go.mod h1:ZU+wKx09xmXbtOf+swccuicq5Bkezby3k49uk7PCoA0=
+github.com/faustbrian/go-clock v1.2.1 h1:BrJCEq7TQEUIY6YbQS6C5ubsfZ1o7aFPdMns+vghLww=
+github.com/faustbrian/go-clock v1.2.1/go.mod h1:ZU+wKx09xmXbtOf+swccuicq5Bkezby3k49uk7PCoA0=
 github.com/faustbrian/go-correlation v1.0.0 h1:2Z+tlY59nNBdlGFBadPTeuDo9/029IvS/DytFFxsMlk=
 github.com/faustbrian/go-correlation v1.0.0/go.mod h1:upLcV0fqKC8IUUx11R6c69CVwC3DO1EeXsw2BQU2PKE=
 github.com/faustbrian/go-identifier v1.0.0 h1:5lXZbS2wK4NelWv4ekRocwOwjkWt1ch/nh7TScxsFO4=
