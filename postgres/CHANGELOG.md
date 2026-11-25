@@ -4,6 +4,8 @@
 
 ### Added
 
+- Append native SCIM Bulk cutoff events under each skipped child's own
+  command binding in the existing protected identity transaction.
 - Add an identity transaction contributor for immutable command/index audit
   bindings and retained participant recovery evidence. Audit effects stage only
   through the owning coordinator; no independent transaction or commit is added.

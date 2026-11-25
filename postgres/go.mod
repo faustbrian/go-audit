@@ -6,8 +6,8 @@ require (
 	github.com/faustbrian/go-audit v1.0.0
 	github.com/faustbrian/go-authorization/v3 v3.0.1-0.20261015052455-a55bbebb1060
 	github.com/faustbrian/go-clock v1.2.0
-	github.com/faustbrian/go-identity v0.0.0-20261015054516-5afeba0ac471
-	github.com/faustbrian/go-identity/postgres v0.0.0-20261015060432-bdc73de10a74
+	github.com/faustbrian/go-identity v0.0.0-20261123113741-94b876278a93
+	github.com/faustbrian/go-identity/postgres v0.0.0-20261125091128-e6926ecbcb2c
 	github.com/faustbrian/go-postgres v1.1.1-0.20260912090843-61261695bcc7
 	github.com/jackc/pgx/v5 v5.11.0
 	go.uber.org/goleak v1.3.0
