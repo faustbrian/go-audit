@@ -284,15 +284,17 @@ func (store *Store) prepare(records []audit.Record) ([]preparedRecord, error) {
 	return result, nil
 }
 
-func insert(ctx context.Context, tx pgx.Tx, value preparedRecord) (audit.AppendStatus, error) {
-	record := value.record
-	var status int16
-	err := tx.QueryRow(ctx, `
+const appendRecordSQL = `
 		SELECT audit.append_record(
 			$1::text, $2::timestamptz, $3::timestamptz, NULLIF($4::text, ''),
 			$5::smallint, NULLIF($6::text, ''), $7::text, $8::text,
 			$9::text, $10::smallint, NULLIF($11::text, ''), $12::bytea, $13::bytea
-		)`,
+		)`
+
+func insert(ctx context.Context, tx pgx.Tx, value preparedRecord) (audit.AppendStatus, error) {
+	record := value.record
+	var status int16
+	err := tx.QueryRow(ctx, appendRecordSQL,
 		record.ID(), record.OccurredAt(), record.RecordedAt(), record.Context().TenantID(),
 		record.Actor().Kind(), record.Actor().ID(), record.Subject().Type(), record.Subject().ID(),
 		record.Action(), record.Outcome(), record.Context().CorrelationID(), value.canonical, value.digest,

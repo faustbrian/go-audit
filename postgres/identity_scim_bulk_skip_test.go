@@ -35,3 +35,18 @@ func TestIdentitySCIMBulkSkipAuditsRequireNativeAuthority(t *testing.T) {
 		t.Fatal("cutoff persistence lost cancellation", err)
 	}
 }
+
+func TestIdentitySCIMBulkReconciliationRequiresKernelCustody(t *testing.T) {
+	c, err := NewIdentityContributor(Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := c.PersistSCIMBulkReconciliationAudit(context.Background(), identitypostgres.Work{}); err == nil {
+		t.Fatal("reconciliation audit accepted Work without kernel custody")
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if err := c.PersistSCIMBulkReconciliationAudit(ctx, identitypostgres.Work{}); !errors.Is(err, context.Canceled) {
+		t.Fatal("reconciliation audit lost cancellation", err)
+	}
+}
